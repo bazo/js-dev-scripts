@@ -5,36 +5,18 @@ import chokidar from "chokidar";
 import getPort from "get-port";
 import * as esbuild from "esbuild";
 import * as nunjucks from "nunjucks";
-import { ESLint } from "eslint";
+import * as WebSocket from "ws";
+import chalk from "chalk";
+import FileManager from "../lib/fileManager";
+import { Extname, LintResults, mimeTypes } from "../lib/types";
+import { clearConsole, createMessage, formatChokidarEvent, processLintResult } from "../lib/functions";
+import { lintFile } from "../lib/lint";
 
-async function start() {
-	const preferredPort = parseInt(process.env.PORT || "3000");
-	const port = await getPort({ port: preferredPort });
-
-	startServer(port);
-}
-
-const mimeTypes = {
-	".html": "text/html",
-	".js": "text/javascript",
-	".css": "text/css",
-	".json": "application/json",
-	".png": "image/png",
-	".jpg": "image/jpg",
-	".gif": "image/gif",
-	".svg": "image/svg+xml",
-	".wav": "audio/wav",
-	".mp4": "video/mp4",
-	".woff": "application/font-woff",
-	".ttf": "application/font-ttf",
-	".eot": "application/vnd.ms-fontobject",
-	".otf": "application/font-otf",
-	".wasm": "application/wasm",
-};
-
-type Extname = keyof typeof mimeTypes;
+process.env.NODE_ENV = "development";
+const HOST = process.env.HOST || "0.0.0.0";
 
 const cwd = process.cwd();
+const buildFolder = path.resolve(cwd, "./build");
 const srcFolder = path.resolve(cwd, "./src");
 const publicFolder = path.resolve(cwd, "./public");
 const indexFile = path.resolve(cwd, publicFolder, "index.html");
@@ -45,49 +27,45 @@ const esbuildOptions: esbuild.BuildOptions = {
 	define: {
 		"process.env.NODE_ENV": '"development"',
 	},
+	outdir: buildFolder,
 	bundle: true,
 	color: true,
 	write: false,
 	format: "esm",
 	incremental: true,
 	inject: [path.resolve(__dirname, "../react-shim.js")],
+	logLevel: "error",
 };
-
-const eslint = new ESLint({
-	useEslintrc: true,
-});
-
-class FileManager {
-	filesMap = new Map<string, string>();
-
-	public setFile(name: string, contents: string): void {
-		this.filesMap.set(name, contents);
-	}
-
-	public getContents(name: string): string | undefined {
-		return this.filesMap.get(name);
-	}
-
-	public hasFile(name: string): boolean {
-		return this.filesMap.has(name);
-	}
-}
 
 const fm = new FileManager();
 
-async function buildApp() {
-	const res = await esbuild.build(esbuildOptions);
-	//console.log({ res });
-	for (const file of res.outputFiles!) {
-		//console.log({ file });
-		fm.setFile("bundle.js", file.text);
-	}
-	console.log({ warnings: res.warnings });
+const devJS = fs.readFileSync(path.resolve(__dirname, "../dev/dev.js"), "utf8");
+
+fm.setFile("dev.js", devJS);
+
+async function lintApp(): Promise<LintResults> {
+	return lintFile(srcFolder);
 }
 
-async function buildPublic() {
+async function buildApp(wss?: WebSocket.Server) {
+	const { warnings, outputFiles } = await esbuild.build(esbuildOptions);
+	for (const file of outputFiles || []) {
+		fm.setFile("bundle.js", file.text);
+	}
+	if (wss) {
+		wss.clients.forEach((ws) => {
+			ws.send(createMessage("bundle-built", { warnings }));
+		});
+	}
+}
+
+async function buildPublic(wsPort: number, wss?: WebSocket.Server) {
 	const indexCode = nunjucks.render(indexFile, {
-		bundle_script: '<script charset="utf-8" src="bundle.js" type="module"></script>',
+		bundle_script: `
+		<script charset="utf-8">window.WEBSOCKET_PORT=${wsPort};</script>
+		<script charset="utf-8" src="dev.js" type="module"></script>
+		<script charset="utf-8" src="bundle.js" type="module"></script>
+		`,
 	});
 
 	//console.log({ indexCode });
@@ -99,29 +77,10 @@ async function buildPublic() {
 	});
 }
 
-// One-liner for current directory
-chokidar.watch(srcFolder, { awaitWriteFinish: false, ignoreInitial: true }).on("all", async (event, path) => {
-	console.log(event, { path });
-	if (!["change", "add"].includes(event)) {
-		return;
-	}
-
-	const results = await eslint.lintFiles(path);
-	console.log({ result: results[0], results: results[0].messages });
-	buildApp();
-});
-
-chokidar.watch(publicFolder).on("all", (event, path) => {
-	//console.log(event, path);
-	if (event !== "add") {
-		return;
-	}
-	buildPublic();
-});
-
-async function startServer(port: number): Promise<void> {
-	http.createServer((request: http.IncomingMessage, response: http.ServerResponse) => {
-		let filePath = request.url!;
+async function startServer(port: number): Promise<WebSocket.Server> {
+	console.log(chalk.cyan("Starting the development server...\n"));
+	const server = http.createServer((request: http.IncomingMessage, response: http.ServerResponse) => {
+		let filePath = request.url || "/";
 		if (filePath == "/") {
 			filePath = "/index.html";
 		}
@@ -141,11 +100,80 @@ async function startServer(port: number): Promise<void> {
 			response.writeHead(200, { "Content-Type": "text/html" });
 			response.end(content, "utf-8");
 		}
-	}).listen(port);
-	console.log(`Server running at http://127.0.0.1:${port}`);
+	});
+
+	const wss = new WebSocket.Server({ server });
+
+	wss.on("connection", (ws) => {
+		ws.on("message", (message) => {
+			console.log("received: %s", message);
+		});
+		ws.send(createMessage("dev-server-connected"));
+	});
+
+	server.listen(port, HOST, undefined, () => {
+		["SIGINT", "SIGTERM"].forEach(function (sig) {
+			process.on(sig, function () {
+				server.close();
+				process.exit();
+			});
+		});
+
+		// Gracefully exit when stdin ends
+		process.stdin.on("end", function () {
+			server.close();
+			process.exit();
+		});
+		process.stdin.resume();
+	});
+
+	console.log(chalk.green(`Server running at http://127.0.0.1:${port}`));
+	return wss;
 }
 
-buildApp();
-buildPublic();
+let wss: WebSocket.Server;
+async function start() {
+	console.clear();
+	const preferredPort = parseInt(process.env.PORT || "3000");
+	const port = await getPort({ port: preferredPort });
+
+	wss = await startServer(port);
+
+	const lintResult = await lintApp();
+	processLintResult(lintResult);
+	if (lintResult.errorCount === 0) {
+		buildApp();
+	}
+
+	buildPublic(port);
+
+	chokidar.watch(srcFolder, { awaitWriteFinish: false, ignoreInitial: true }).on("all", async (event, path) => {
+		if (!["change"].includes(event)) {
+			return;
+		}
+
+		console.log(formatChokidarEvent(event, path));
+
+		const lintResult = await lintFile(path);
+
+		processLintResult(lintResult);
+
+		if (lintResult.errorCount === 0) {
+			buildApp(wss);
+		}
+	});
+
+	chokidar.watch(publicFolder, { awaitWriteFinish: false, ignoreInitial: true }).on("all", (event, path) => {
+		if (!["change", "add"].includes(event)) {
+			return;
+		}
+
+		console.log(formatChokidarEvent(event, path));
+
+		buildPublic(port, wss);
+	});
+}
 
 start();
+
+//@TODO: https://medium.com/@maheshsenni/creating-a-module-bundler-with-hot-module-replacement-b439f0cc660f

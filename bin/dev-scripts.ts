@@ -7,8 +7,6 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-require('ts-node').register({ /* options */ })
-
 // Makes the script crash on unhandled rejections instead of silently
 // ignoring them. In the future, promise rejections that are not handled will
 // terminate the Node.js process with a non-zero exit code.
@@ -16,24 +14,34 @@ process.on("unhandledRejection", (err) => {
 	throw err;
 });
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const spawn = require("cross-spawn");
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const path = require("path");
+
+const dotenv = require("dotenv");
+const env = dotenv.config({
+	path: path.resolve(__dirname, "../.env"),
+});
+const dotenvExpand = require("dotenv-expand");
+dotenvExpand(env);
+
 const args = process.argv.slice(2);
 
 const scriptIndex = args.findIndex((x) => x === "build" || x === "start" || x === "test");
 const script = scriptIndex === -1 ? args[0] : args[scriptIndex];
-const nodeArgs = scriptIndex > 0 ? args.slice(0, scriptIndex) : [];
+let nodeArgs = scriptIndex > 0 ? args.slice(0, scriptIndex) : [];
 
-const execPath = path.resolve(__dirname, "../node_modules/.bin/ts-node-script");
+let execPath = path.resolve(__dirname, "../node_modules/.bin/ts-node-script");
+
+if (process.env.MODE === "development" && script === "start") {
+	execPath = path.resolve(__dirname, "../node_modules/.bin/ts-node-dev");
+	nodeArgs = nodeArgs.concat(["--script-mode", "--rs", "--exit-child", "--clear" /*`--watch ${path.resolve(__dirname, "../dev/dev.js")}`*/]);
+}
 
 if (["build", "start", "test"].includes(script)) {
-	console.log(execPath, nodeArgs.concat(require.resolve(`../scripts/${script}.ts`)).concat(args.slice(scriptIndex + 1)));
-	const result = spawn.sync(execPath, nodeArgs.concat(require.resolve(`../scripts/${script}.ts`)).concat(args.slice(scriptIndex + 1)), {
+	nodeArgs = nodeArgs.concat(require.resolve(`../scripts/${script}.ts`)).concat(args.slice(scriptIndex + 1));
+	const result = spawn.sync(execPath, nodeArgs, {
 		stdio: "inherit",
 	});
-	console.log(result);
 	if (result.signal) {
 		if (result.signal === "SIGKILL") {
 			console.log(
@@ -53,5 +61,5 @@ if (["build", "start", "test"].includes(script)) {
 	process.exit(result.status);
 } else {
 	console.log('Unknown script "' + script + '".');
-	console.log("Perhaps you need to update react-dev-scripts?");
+	console.log("Perhaps you need to update dev-scripts?");
 }

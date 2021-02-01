@@ -20,5 +20,7 @@ module.exports = {
 
 	rules: {
 		"@typescript-eslint/explicit-module-boundary-types": "error",
+		"@typescript-eslint/no-var-requires": "off",
 	},
+	ignorePatterns: ["dev.js"],
 };
