@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import * as http from "http";
 import * as fs from "fs";
 import * as path from "path";
@@ -11,6 +12,9 @@ import FileManager from "../lib/fileManager";
 import { Extname, LintResults, mimeTypes } from "../lib/types";
 import { clearConsole, createMessage, formatChokidarEvent, processLintResult } from "../lib/functions";
 import { lintFile } from "../lib/lint";
+import revHash from "rev-hash";
+//@ts-ignore
+import revPath from "rev-path";
 
 process.env.NODE_ENV = "development";
 const HOST = process.env.HOST || "0.0.0.0";
@@ -41,40 +45,64 @@ const fm = new FileManager();
 
 const devJS = fs.readFileSync(path.resolve(__dirname, "../dev/dev.js"), "utf8");
 
-fm.setFile("dev.js", devJS);
+fm.setFile("/dev.js", devJS);
 
 async function lintApp(): Promise<LintResults> {
 	return lintFile(srcFolder);
 }
-
-async function buildApp(wss?: WebSocket.Server) {
-	const { warnings, outputFiles } = await esbuild.build(esbuildOptions);
-	for (const file of outputFiles || []) {
-		fm.setFile("bundle.js", file.text);
-	}
-	if (wss) {
-		wss.clients.forEach((ws) => {
-			ws.send(createMessage("bundle-built", { warnings }));
-		});
-	}
+async function buildApp(): Promise<esbuild.BuildResult> {
+	return await esbuild.build(esbuildOptions);
 }
 
-async function buildPublic(wsPort: number, wss?: WebSocket.Server) {
+function getMemoryPath(filePath: string): string {
+	return `/${path.relative(buildFolder, filePath)}`;
+}
+
+async function buildPublic(builtFiles: esbuild.OutputFile[] = [], wsPort: number): Promise<void> {
+	const jsFiles: esbuild.OutputFile[] = [];
+	const cssFiles: esbuild.OutputFile[] = [];
+
+	for (const file of builtFiles) {
+		const buffer = Buffer.from(file.contents);
+
+		const ext = path.parse(file.path).ext;
+
+		if ([".js", ".css"].includes(ext)) {
+			const hash = revHash(buffer);
+			file.path = revPath(file.path, hash);
+
+			switch (ext) {
+				case ".js": {
+					jsFiles.push(file);
+					break;
+				}
+
+				case ".css": {
+					cssFiles.push(file);
+					break;
+				}
+			}
+		}
+
+		fm.setFile(getMemoryPath(file.path), file.text);
+	}
+
 	const indexCode = nunjucks.render(indexFile, {
-		bundle_script: `
-		<script charset="utf-8">window.WEBSOCKET_PORT=${wsPort};</script>
-		<script charset="utf-8" src="dev.js" type="module"></script>
-		<script charset="utf-8" src="bundle.js" type="module"></script>
-		`,
+		bundle_script:
+			`<script charset="utf-8">window.WEBSOCKET_PORT=${wsPort.toString()};</script><script charset="utf-8" src="/dev.js" type="module"></script>` +
+			jsFiles
+				.map((file) => {
+					return `<script charset="utf-8" src="${getMemoryPath(file.path)}" type="module"></script>`;
+				})
+				.join(""),
+		bundle_css: cssFiles
+			.map((file) => {
+				return `<link href="${getMemoryPath(file.path)}" rel="stylesheet" />`;
+			})
+			.join(""),
 	});
 
-	//console.log({ indexCode });
-
-	fm.setFile("index.html", indexCode);
-
-	fs.readdir(publicFolder, { encoding: "utf-8" }, (err, files) => {
-		//console.log({ files });
-	});
+	fm.setFile(`/index.html`, indexCode);
 }
 
 async function startServer(port: number): Promise<WebSocket.Server> {
@@ -84,8 +112,6 @@ async function startServer(port: number): Promise<WebSocket.Server> {
 		if (filePath == "/") {
 			filePath = "/index.html";
 		}
-
-		filePath = filePath.slice(1);
 
 		const extname = String(path.extname(filePath)).toLowerCase() as Extname;
 
@@ -140,12 +166,28 @@ async function start() {
 	wss = await startServer(port);
 
 	const lintResult = await lintApp();
+
+	const notifyBuildStart = () => {
+		if (wss) {
+			wss.clients.forEach((ws) => {
+				ws.send(createMessage("bundle-build-start", { warnings: [] }));
+			});
+		}
+	};
+
+	const notifyBuildEnd = () => {
+		if (wss) {
+			wss.clients.forEach((ws) => {
+				ws.send(createMessage("bundle-build-end", { warnings: [] }));
+			});
+		}
+	};
+
 	processLintResult(lintResult);
 	if (lintResult.errorCount === 0) {
-		buildApp();
+		const { outputFiles } = await buildApp();
+		buildPublic(outputFiles, port);
 	}
-
-	buildPublic(port);
 
 	chokidar.watch(srcFolder, { awaitWriteFinish: false, ignoreInitial: true }).on("all", async (event, path) => {
 		if (!["change"].includes(event)) {
@@ -154,23 +196,29 @@ async function start() {
 
 		console.log(formatChokidarEvent(event, path));
 
+		notifyBuildStart();
 		const lintResult = await lintFile(path);
 
 		processLintResult(lintResult);
 
 		if (lintResult.errorCount === 0) {
-			buildApp(wss);
+			const { outputFiles } = await buildApp();
+			buildPublic(outputFiles, port);
 		}
+		notifyBuildEnd();
 	});
 
-	chokidar.watch(publicFolder, { awaitWriteFinish: false, ignoreInitial: true }).on("all", (event, path) => {
+	chokidar.watch(publicFolder, { awaitWriteFinish: false, ignoreInitial: true }).on("all", async (event, path) => {
 		if (!["change", "add"].includes(event)) {
 			return;
 		}
 
 		console.log(formatChokidarEvent(event, path));
 
-		buildPublic(port, wss);
+		notifyBuildStart();
+		const { outputFiles } = await buildApp();
+		buildPublic(outputFiles, port);
+		notifyBuildEnd();
 	});
 }
 

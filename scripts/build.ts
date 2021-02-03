@@ -3,7 +3,7 @@ import * as fs from "fs";
 import * as path from "path";
 import * as esbuild from "esbuild";
 import * as nunjucks from "nunjucks";
-import { LintResults } from "../lib/types";
+import { BuiltFilesReport, LintResults } from "../lib/types";
 import { lintFile, tscLint } from "../lib/lint";
 import { prefix, processLintResult, processTscLintResult } from "../lib/functions";
 import del from "del";
@@ -53,12 +53,6 @@ async function lintApp(): Promise<LintResults> {
 
 async function buildApp(): Promise<esbuild.BuildResult> {
 	return await esbuild.build(esbuildOptions);
-}
-
-interface BuiltFilesReport {
-	size: number;
-	gzippedSize: number;
-	fileName: string;
 }
 
 async function buildPublic(builtFiles: esbuild.OutputFile[] = []): Promise<[BuiltFilesReport[], number, NodeJS.ErrnoException[]]> {

@@ -27,6 +27,12 @@ export interface LintResults {
 }
 
 export interface Message {
-	event: "dev-server-connected" | "bundle-built";
+	event: "dev-server-connected" | "bundle-build-start" | "bundle-build-end";
 	data: any;
+}
+
+export interface BuiltFilesReport {
+	size: number;
+	gzippedSize: number;
+	fileName: string;
 }

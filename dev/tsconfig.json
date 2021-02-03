@@ -1,6 +1,8 @@
 {
 	"compilerOptions": {
-		"esModuleInterop": true
+		"esModuleInterop": true,
+		"jsx": "react",
+		"jsxFactory": "Nano.h"
 	},
-	"include": ["dev.ts"]
+	"include": ["dev.ts", "infoBar.ts"]
 }
