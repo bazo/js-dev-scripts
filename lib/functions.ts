@@ -60,3 +60,8 @@ export function processTscLintResult(results: GrammarItem[]): void {
 export function prefix(text: "build" | "eslint" | "typescript"): string {
 	return `[${chalk.bold(text.toUpperCase())}]:`;
 }
+
+export function padMultilineText(text: string, indent = 4): string {
+	const lines = text.split("\n");
+	return lines.map((line) => line.padStart(indent + line.length, " ")).join("\n");
+}

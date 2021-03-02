@@ -34,7 +34,7 @@ let execPath = path.resolve(__dirname, "../node_modules/.bin/ts-node-script");
 
 if (process.env.MODE === "development" && script === "start") {
 	execPath = path.resolve(__dirname, "../node_modules/.bin/ts-node-dev");
-	nodeArgs = nodeArgs.concat(["--script-mode", "--rs", "--exit-child", "--clear" /*`--watch ${path.resolve(__dirname, "../dev/dev.js")}`*/]);
+	nodeArgs = nodeArgs.concat(["--enable-source-maps", "--script-mode", "--rs", "--exit-child", "--clear" /*`--watch ${path.resolve(__dirname, "../dev/dev.js")}`*/]);
 }
 
 if (["build", "start", "test"].includes(script)) {
