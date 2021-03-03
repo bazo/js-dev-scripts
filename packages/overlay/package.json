@@ -1,6 +1,6 @@
 {
 	"name": "@bazo/js-dev-overlay",
-	"version": "0.0.3",
+	"version": "0.0.4",
 	"license": "MIT",
 	"repository": {
 		"type": "git",
@@ -16,7 +16,7 @@
 		"url": "https://bazo.sk"
 	},
 	"dependencies": {
-		"@bazo/js-dev-scripts-types": "*",
+		"@bazo/js-dev-scripts-types": "^0.0.2",
 		"nano-jsx": "^0.0.16",
 		"panic-overlay": "^1.0.45",
 		"ramda": "^0.27.1",

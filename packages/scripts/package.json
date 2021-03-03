@@ -1,6 +1,6 @@
 {
 	"name": "@bazo/js-dev-scripts",
-	"version": "0.0.1",
+	"version": "0.0.2",
 	"license": "MIT",
 	"repository": {
 		"type": "git",
@@ -17,7 +17,7 @@
 	"types": "./testing.d.ts",
 	"dependencies": {
 		"@aivenio/tsc-output-parser": "^2.1.1",
-		"@bazo/js-dev-overlay": "*",
+		"@bazo/js-dev-overlay": "^0.0.4",
 		"@types/chai": "^4.2.15",
 		"@types/ramda": "^0.27.38",
 		"chalk": "^4.1.0",
