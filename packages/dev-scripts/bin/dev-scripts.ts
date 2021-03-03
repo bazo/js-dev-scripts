@@ -35,7 +35,7 @@ let execPath = "node";
 const fileExt = process.env.FILE_EXT || "ts";
 
 /* @__PURE__ */
-if (process.env.MODE === "development") {
+if (process.env.MODE !== "production") {
 	execPath = path.resolve(__dirname, "../node_modules/.bin/ts-node-script");
 	if (script === "start") {
 		execPath = path.resolve(__dirname, "../node_modules/.bin/ts-node-dev");
