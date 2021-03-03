@@ -2,7 +2,7 @@
 import "panic-overlay/build/panic-overlay.browser";
 import { ConstantBackoff, WebsocketBuilder } from "websocket-ts";
 import Nano from "nano-jsx";
-import { Message } from "../lib/types";
+import { Message } from "@bazo/js-dev-scripts-types";
 import InfoBar, { infoBarStore } from "./infoBar";
 
 interface MyWindow {

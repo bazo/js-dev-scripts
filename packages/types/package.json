@@ -1,0 +1,19 @@
+{
+	"name": "@bazo/js-dev-scripts-types",
+	"version": "0.0.1",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/bazo/js-dev-scripts"
+	},
+	"main": "dist/index.js",
+	"types": "dist/inde.d.ts",
+	"author": {
+		"email": "martin@bazo.sk",
+		"name": "Martin Bažík",
+		"url": "https://bazo.sk"
+	},
+	"scripts": {
+		"build": "tsc --project tsconfig.json"
+	}
+}
