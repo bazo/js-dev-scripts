@@ -35,6 +35,6 @@
 	},
 	"scripts": {
 		"build": "lerna run build",
-		"pub": "lerna run pub"
+		"pub": "lerna publish --yes --registry https://npm.pkg.github.com/ && lerna publish --yes"
 	}
 }
