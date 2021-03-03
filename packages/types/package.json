@@ -7,13 +7,20 @@
 		"url": "https://github.com/bazo/js-dev-scripts"
 	},
 	"main": "dist/index.js",
-	"types": "dist/inde.d.ts",
+	"types": "dist/index.d.ts",
 	"author": {
 		"email": "martin@bazo.sk",
 		"name": "Martin Bažík",
 		"url": "https://bazo.sk"
 	},
+	"files": [
+		"dist/**/*"
+	],
 	"scripts": {
-		"build": "tsc --project tsconfig.json"
+		"build": "tsc --project tsconfig.json",
+		"prepublish": "yarn build",
+		"pub": "yarn pub:gh && yarn pub:npm",
+		"pub:npm": "yarn publish --access public",
+		"pub:gh": "yarn login --registry=https://npm.pkg.github.com/ && yarn publish"
 	}
 }

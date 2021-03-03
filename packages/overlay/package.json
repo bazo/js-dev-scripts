@@ -33,7 +33,7 @@
 		"build": "esbuild src/dev.tsx --outfile=dist/index.js --bundle --sourcemap=inline --define:process.env.NODE_ENV=\\\"production\\\" --format=esm --tsconfig=./tsconfig.json",
 		"prepublish": "yarn build",
 		"pub": "yarn pub:gh && yarn pub:npm",
-		"pub:npm": "yarn publish --access public && git push",
+		"pub:npm": "yarn publish --access public",
 		"pub:gh": "yarn login --registry=https://npm.pkg.github.com/ && yarn publish"
 	}
 }
