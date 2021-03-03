@@ -4,5 +4,5 @@
 		"jsx": "react",
 		"jsxFactory": "Nano.h"
 	},
-	"include": ["dev.ts", "infoBar.ts"]
+	"include": ["./src"]
 }

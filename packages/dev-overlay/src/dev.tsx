@@ -16,7 +16,7 @@ infoBar.setAttribute("id", "__dev-scripts-info-bar");
 
 document.body.appendChild(infoBar);
 
-const ws = new WebsocketBuilder(`ws://localhost:${wsPort}`)
+new WebsocketBuilder(`ws://localhost:${wsPort}`)
 	.withBackoff(new ConstantBackoff(500))
 	.onOpen((i, ev) => {
 		console.info("DevServer connecting...");

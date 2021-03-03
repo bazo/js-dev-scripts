@@ -43,7 +43,7 @@ const esbuildOptions: esbuild.BuildOptions = {
 
 const fm = new FileManager();
 
-const devJS = fs.readFileSync(path.resolve(__dirname, "../dev/dev.js"), "utf8");
+const devJS = fs.readFileSync(require.resolve("@bazo/js-dev-overlay"), "utf8");
 
 fm.setFile("/dev.js", devJS);
 

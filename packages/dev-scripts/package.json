@@ -1,0 +1,69 @@
+{
+	"name": "@bazo/js-dev-scripts",
+	"version": "0.0.1",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/bazo/js-dev-scripts"
+	},
+	"author": {
+		"email": "martin@bazo.sk",
+		"name": "Martin Bažík",
+		"url": "https://bazo.sk"
+	},
+	"bin": {
+		"dev-scripts": "./bin/dev-scripts.ts"
+	},
+	"types": "./testing.d.ts",
+	"dependencies": {
+		"@aivenio/tsc-output-parser": "^2.1.1",
+		"@bazo/js-dev-overlay": "*",
+		"@types/chai": "^4.2.15",
+		"@types/ramda": "^0.27.38",
+		"chalk": "^4.1.0",
+		"chokidar": "^3.5.1",
+		"cli-highlight": "^2.1.10",
+		"convert-hrtime": "^3.0.0",
+		"cosmiconfig": "^7.0.0",
+		"cpy": "^8.1.1",
+		"cross-spawn": "^7.0.3",
+		"del": "^6.0.0",
+		"dotenv": "^8.2.0",
+		"dotenv-expand": "^5.1.0",
+		"esbuild": "^0.8.54",
+		"eslint": "^7.21.0",
+		"execa": "^5.0.0",
+		"expect": "^26.6.2",
+		"figures": "^3.2.0",
+		"get-port": "^5.1.1",
+		"globby": "^11.0.2",
+		"inquirer": "^8.0.0",
+		"make-dir": "^3.1.0",
+		"nano-jsx": "^0.0.16",
+		"nunjucks": "^3.2.3",
+		"ora": "^5.3.0",
+		"pretty-bytes": "^5.6.0",
+		"pretty-ms": "^7.0.1",
+		"ramda": "^0.27.1",
+		"rev-hash": "^3.0.0",
+		"rev-path": "^2.0.0",
+		"source-map": "^0.7.3",
+		"source-map-url": "^0.4.1",
+		"ts-node": "^9.1.1",
+		"ts-node-dev": "^1.1.6",
+		"typescript": "^4.2.2",
+		"ws": "^7.4.3"
+	},
+	"devDependencies": {
+		"@types/cross-spawn": "^6.0.2",
+		"@types/eslint": "^7.2.6",
+		"@types/node": "^14.14.31",
+		"@types/nunjucks": "^3.1.4",
+		"@types/ws": "^7.4.0",
+		"@typescript-eslint/eslint-plugin": "^4.16.1",
+		"@typescript-eslint/parser": "^4.16.1",
+		"prettier": "^2.2.1",
+		"react": "^17.0.1"
+	},
+	"scripts": {}
+}
