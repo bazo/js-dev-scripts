@@ -1,9 +1,10 @@
 {
-	"private": true,
 	"name": "js-dev-scripts",
+	"version": "0.0.0",
 	"workspaces": [
 		"packages/*"
 	],
+	"private": "true",
 	"license": "MIT",
 	"repository": {
 		"type": "git",
@@ -35,6 +36,7 @@
 	},
 	"scripts": {
 		"build": "lerna run build",
-		"pub": "lerna publish --yes --registry https://npm.pkg.github.com/ && lerna publish --yes"
+		"pub:lerna": "lerna publish --yes --registry https://npm.pkg.github.com/ && lerna publish --yes",
+		"pub": "lerna run pub"
 	}
 }

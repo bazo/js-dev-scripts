@@ -30,15 +30,27 @@ const scriptIndex = args.findIndex((x) => x === "build" || x === "start" || x ==
 const script = scriptIndex === -1 ? args[0] : args[scriptIndex];
 let nodeArgs = scriptIndex > 0 ? args.slice(0, scriptIndex) : [];
 
-let execPath = path.resolve(__dirname, "../node_modules/.bin/ts-node-script");
+let execPath = "node";
 
-if (process.env.MODE === "development" && script === "start") {
-	execPath = path.resolve(__dirname, "../node_modules/.bin/ts-node-dev");
-	nodeArgs = nodeArgs.concat(["--enable-source-maps", "--script-mode", "--rs", "--exit-child", "--clear" /*`--watch ${path.resolve(__dirname, "../dev/dev.js")}`*/]);
+const fileExt = process.env.FILE_EXT || "ts";
+
+/* @__PURE__ */
+if (process.env.MODE === "development") {
+	execPath = path.resolve(__dirname, "../node_modules/.bin/ts-node-script");
+	if (script === "start") {
+		execPath = path.resolve(__dirname, "../node_modules/.bin/ts-node-dev");
+		nodeArgs = nodeArgs.concat([
+			"--enable-source-maps",
+			"--script-mode",
+			"--rs",
+			"--exit-child",
+			"--clear" /*`--watch ${path.resolve(__dirname, "../dev/dev.js")}`*/,
+		]);
+	}
 }
 
 if (["build", "start", "test"].includes(script)) {
-	nodeArgs = nodeArgs.concat(require.resolve(`../scripts/${script}.ts`)).concat(args.slice(scriptIndex + 1));
+	nodeArgs = nodeArgs.concat(require.resolve(`../scripts/${script}.${fileExt}`)).concat(args.slice(scriptIndex + 1));
 	const result = spawn.sync(execPath, nodeArgs, {
 		stdio: "inherit",
 	});

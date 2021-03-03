@@ -4,10 +4,13 @@
 		"skipLibCheck": true,
 		"strict": true,
 		"forceConsistentCasingInFileNames": true,
-		"noEmit": true,
 		"noFallthroughCasesInSwitch": true,
 		"esModuleInterop": true,
 		"moduleResolution": "node",
+		"module": "CommonJS",
+		"declaration": true,
+		"outDir": "./dist"
+		
 	},
-	"include": ["bin/*", "scripts/*", "lib/*"]
+	"include": ["bin/*", "scripts/*", "lib/*", "build.ts"]
 }

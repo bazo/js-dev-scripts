@@ -37,7 +37,7 @@ const esbuildOptions: esbuild.BuildOptions = {
 	color: true,
 	write: false,
 	format: "esm",
-	inject: [path.resolve(__dirname, "../react-shim.js")],
+	//inject: [path.resolve(__dirname, "../react-shim.js")],
 	minify: true,
 	splitting: true,
 	logLevel: "error",
