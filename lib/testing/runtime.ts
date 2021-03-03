@@ -14,6 +14,7 @@ export interface TestResult {
 	name: string;
 	passed: boolean;
 	error: any;
+	time: [number, number];
 }
 
 export interface SuiteResults {
@@ -49,17 +50,14 @@ export default class Tester {
 				this.results[suiteName] = {} as SuiteResults;
 			}
 
+			const start = process.hrtime();
 			try {
-				cb();
-				this.results[suiteName][name] = { suiteName, name, passed: true, error: null };
+				await cb();
+				const time = process.hrtime(start);
+				this.results[suiteName][name] = { suiteName, name, passed: true, error: null, time };
 			} catch (error) {
-				if (error.matcherResult) {
-					//console.log(error);
-					//console.log(error.matcherResult.message());
-				} else {
-					//console.log(error);
-				}
-				this.results[suiteName][name] = { suiteName, name, passed: false, error };
+				const time = process.hrtime(start);
+				this.results[suiteName][name] = { suiteName, name, passed: false, error, time };
 			}
 		}
 	};

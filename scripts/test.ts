@@ -5,8 +5,15 @@ import * as path from "path";
 import chokidar from "chokidar";
 import * as esbuild from "esbuild";
 import chalk from "chalk";
-import { formatChokidarEvent, padMultilineText } from "../lib/functions";
-import Tester, { Results, SuiteResults, TestResult } from "../lib/testing/runtime";
+import {
+	formatChokidarEvent,
+	formatTestDuration,
+	getMillisecondsFromHrTime,
+	padMultilineText,
+	showErrorOrigin,
+	showTotalResults,
+} from "../lib/functions";
+import Tester, { Results, SuiteResults } from "../lib/testing/runtime";
 import { without } from "ramda";
 import expect from "expect";
 import * as fs from "fs";
@@ -14,6 +21,7 @@ import * as vm from "vm";
 //@ts-ignore
 import sourceMapURL from "source-map-url";
 import globby from "globby";
+import figures from "figures";
 
 const cwd = process.cwd();
 const srcFolder = path.resolve(cwd, "./src");
@@ -79,55 +87,67 @@ function suiteHasFailedTest(suiteResults: SuiteResults): boolean {
 	return Object.values(suiteResults).some((testResult) => testResult.passed === false);
 }
 
-async function printReport(allResults: ResultsWithSource[]): Promise<void> {
+async function printTestReport(allResults: ResultsWithSource[]): Promise<void> {
 	const suites = { total: 0, failed: 0 };
 	const tests = { total: 0, failed: 0 };
-	allResults.forEach(({ filePath, code, sourceMap, results }) => {
+	let totalTime = 0;
+	for (const { filePath, code, sourceMap, results } of allResults) {
 		const suitesNo = Object.keys(results).length;
 		suites.total = suites.total + suitesNo;
-		Object.entries(results).forEach(([suiteName, suiteResults]) => {
+
+		for (const [suiteName, suiteResults] of Object.entries(results)) {
 			const testsNo = Object.keys(suiteResults).length;
 			tests.total = tests.total + testsNo;
+			const testEntries = Object.entries(suiteResults);
+			for (const [, testResult] of testEntries) {
+				totalTime += getMillisecondsFromHrTime(testResult.time);
+			}
+
 			if (suiteHasFailedTest(suiteResults)) {
 				suites.failed = suites.failed + 1;
 
 				console.log(
-					`${chalk.bgRed.black(" FAIL ")} ${chalk.grey(path.relative(process.cwd(), path.dirname(filePath)) + "/")}${chalk.white(
+					`${chalk.bgRed.black(" FAIL ")} ${chalk.dim(path.relative(process.cwd(), path.dirname(filePath)) + "/")}${chalk.white(
 						path.basename(filePath)
 					)}`
 				);
 
-				const testEntries = Object.entries(suiteResults);
-
 				console.log(`  ${chalk.white(suiteName)}`);
-				testEntries.forEach(([testName, testResult]) => {
-					console.log(`    ${testResult.passed ? chalk.green("✓") : chalk.red("✕")} ${chalk.grey(`${testName} (1ms)`)}`);
+				for (const [testName, testResult] of testEntries) {
+					console.log(
+						`    ${testResult.passed ? chalk.green(figures.tick) : chalk.red(figures.cross)} ${chalk.dim(
+							`${testName} (${formatTestDuration(testResult.time)})`
+						)}`
+					);
 
 					if (!testResult.passed) {
 						tests.failed = tests.failed + 1;
 					}
-				});
+				}
 
-				testEntries.forEach(([testName, testResult]) => {
+				for (const [testName, testResult] of testEntries) {
 					if (!testResult.passed) {
 						console.log("");
 						console.log(`  ${chalk.red(`● ${suiteName} > ${testName}`)}`);
 						console.log("");
 						console.log(padMultilineText(testResult.error.matcherResult.message()));
+						console.log("");
+						const codeHighlight = await showErrorOrigin(testResult.error, code, sourceMap);
+						console.log(codeHighlight);
 					}
-				});
+				}
 			}
-		});
-	});
+		}
+	}
 
-	console.log({ suites, tests });
+	console.log(showTotalResults(suites, tests, totalTime));
 }
 
 async function test() {
 	console.clear();
 
 	const testGlob = `${srcFolder}/**/*.test.(ts|tsx)`;
-	const srcGlob = `${srcFolder}/**/*.(ts|tsx)`;
+	const srcGlob = `${srcFolder}/**/*(?!test).(ts|tsx)`;
 
 	const tm = new TestMemory();
 
@@ -143,8 +163,6 @@ async function test() {
 			const codeAndSourceMap = buildResult.outputFiles[0].text;
 
 			const sourceMap = sourceMapURL.getFrom(codeAndSourceMap);
-			//console.log({sourceMap});
-
 			const code = sourceMapURL.removeFrom(codeAndSourceMap);
 
 			const sandbox = { ...new Tester(), expect, global: {} };
@@ -167,15 +185,16 @@ async function test() {
 				results.push(result);
 			}
 		}
-		printReport(results);
+		printTestReport(results);
 	}
 
-	chokidar.watch(srcGlob, { awaitWriteFinish: false, ignoreInitial: true }).on("all", async (event, filePath) => {
+	chokidar.watch(srcGlob, { awaitWriteFinish: false, ignoreInitial: true, ignored: testGlob }).on("all", async (event, filePath) => {
 		if (!["change", "add", "unlink"].includes(event)) {
 			return;
 		}
-		console.log(formatChokidarEvent(event, filePath));
 		console.clear();
+		console.log(formatChokidarEvent(event, filePath));
+
 		testAll();
 	});
 
@@ -196,7 +215,7 @@ async function test() {
 
 		const result = await testFile(filePath);
 		if (result) {
-			printReport([result]);
+			printTestReport([result]);
 		}
 	});
 
