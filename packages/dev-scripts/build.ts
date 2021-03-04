@@ -1,5 +1,5 @@
 import * as esbuild from "esbuild";
-import { copyFileSync } from "fs";
+import { copyFileSync, writeFileSync } from "fs";
 import del from "del";
 
 const buildFolder = "./dist";
@@ -34,7 +34,11 @@ async function build(): Promise<void> {
 	console.log(r);
 
 	copyFileSync("./react-shim.js", `${buildFolder}/react-shim.js`);
-	copyFileSync("./package.json.dist", `${buildFolder}/package.json`);
+
+	const pkg = require("./package.json");
+	const pkgDist = require("./package.dist.json");
+
+	writeFileSync(`${buildFolder}/package.json`, JSON.stringify({ ...pkgDist, dependencies: pkg.dependencies, version: pkg.version }));
 }
 
 build();

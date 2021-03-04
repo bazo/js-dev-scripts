@@ -12,13 +12,7 @@
 		"url": "https://bazo.sk"
 	},
 	"bin": {
-		"dev-scripts": "./bin/dev-scripts.ts"
+		"dev-scripts": "./bin/dev-scripts.js"
 	},
-	"types": "./testing.d.ts",
-	"dependencies": {
-		"@bazo/js-dev-overlay": "^0.0.6",
-		"esbuild": "^0.8.54",
-		"eslint": "^7.21.0",
-		"espree": "^7.3.1"
-	}
+	"types": "./testing.d.ts"
 }
