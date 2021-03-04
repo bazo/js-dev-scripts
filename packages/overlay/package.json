@@ -1,6 +1,6 @@
 {
 	"name": "@bazo/js-dev-overlay",
-	"version": "0.0.15",
+	"version": "0.0.16",
 	"license": "MIT",
 	"main": "dist/index.js",
 	"files": [
@@ -25,5 +25,5 @@
 		"access": "public",
 		"allow-same-version": true
 	},
-	"gitHead": "4d195ea056f4477da6f1302e052729cb961065fe"
+	"gitHead": "42b81a4a601b48a76f42b52ccce519a018570107"
 }
