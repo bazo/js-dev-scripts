@@ -52,8 +52,13 @@ fm.setFile("/dev.js", devJS);
 async function lintApp(): Promise<LintResults> {
 	return lintFile(srcFolder);
 }
-async function buildApp(): Promise<esbuild.BuildResult> {
-	return await esbuild.build(esbuildOptions);
+async function buildApp(): Promise<[Error | null, esbuild.BuildResult | Partial<esbuild.BuildResult>]> {
+	try {
+		return [null, await esbuild.build(esbuildOptions)];
+	} catch (error) {
+		console.log(error.message);
+		return [error, { outputFiles: [] }];
+	}
 }
 
 function getMemoryPath(filePath: string): string {
@@ -65,6 +70,9 @@ function getPublicMemoryPath(filePath: string): string {
 }
 
 async function buildPublic(builtFiles: esbuild.OutputFile[] = [], wsPort: number): Promise<void> {
+	if (builtFiles.length === 0) {
+		return;
+	}
 	const jsFiles: esbuild.OutputFile[] = [];
 	const cssFiles: esbuild.OutputFile[] = [];
 
@@ -199,7 +207,7 @@ async function start() {
 
 	processLintResult(lintResult);
 	if (lintResult.errorCount === 0) {
-		const { outputFiles } = await buildApp();
+		const [error, { outputFiles }] = await buildApp();
 		buildPublic(outputFiles, port);
 	}
 
@@ -219,7 +227,7 @@ async function start() {
 		processLintResult(lintResult);
 
 		if (lintResult.errorCount === 0) {
-			const { outputFiles } = await buildApp();
+			const [error, { outputFiles }] = await buildApp();
 			buildPublic(outputFiles, port);
 		}
 		notifyBuildEnd();
@@ -233,7 +241,7 @@ async function start() {
 		console.log(formatChokidarEvent(event, path));
 
 		notifyBuildStart();
-		const { outputFiles } = await buildApp();
+		const [error, { outputFiles }] = await buildApp();
 		buildPublic(outputFiles, port);
 		notifyBuildEnd();
 	});
