@@ -1,12 +1,12 @@
 {
 	"name": "@bazo/js-dev-scripts",
-	"version": "0.0.6",
+	"version": "0.0.7",
 	"bin": {
 		"dev-scripts": "./bin/dev-scripts.ts"
 	},
 	"types": "./testing.d.ts",
 	"dependencies": {
-		"@bazo/js-dev-overlay": "^0.0.6",
+		"@bazo/js-dev-overlay": "^0.0.7",
 		"esbuild": "^0.8.54",
 		"eslint": "^7.21.0",
 		"espree": "^7.3.1"
