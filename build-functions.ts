@@ -30,6 +30,7 @@ export function generatePackageJson(buildFolder: string): void {
 		author,
 		license: pkg.license,
 		name: pkg.name,
+		publishConfig: pkg.publishConfig,
 	});
 
 	writeFileSync(`${buildFolder}/package.json`, JSON.stringify(newPkg, null, 4));
