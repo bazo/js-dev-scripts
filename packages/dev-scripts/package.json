@@ -1,6 +1,6 @@
 {
 	"name": "@bazo/js-dev-scripts",
-	"version": "0.0.18",
+	"version": "0.0.19",
 	"license": "MIT",
 	"types": "./testing.d.ts",
 	"bin": {
@@ -14,7 +14,7 @@
 		"prepack": "yarn ts-node-script prepack.ts"
 	},
 	"dependencies": {
-		"@bazo/js-dev-overlay": "^0.0.17",
+		"@bazo/js-dev-overlay": "^0.0.18",
 		"esbuild": "^0.8.54",
 		"eslint": "^7.21.0",
 		"espree": "^7.3.1",
