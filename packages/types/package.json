@@ -5,11 +5,7 @@
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
 	"scripts": {
-		"build": "ts-node-script build.ts",
-		"prepublish": "yarn build",
-		"pub": "yarn pub:gh && yarn pub:npm",
-		"pub:npm": "yarn publish --access public",
-		"pub:gh": "yarn login --registry=https://npm.pkg.github.com/ && yarn publish"
+		"build": "ts-node-script build.ts"
 	},
 	"gitHead": "1cce834ea7b161670a572366d94efccc210f351c"
 }

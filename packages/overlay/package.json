@@ -7,11 +7,7 @@
 		"dist/**/*"
 	],
 	"scripts": {
-		"build": "ts-node-script build.ts",
-		"prepublish": "yarn build",
-		"pub": "yarn pub:gh && yarn pub:npm",
-		"pub:npm": "yarn publish --access public",
-		"pub:gh": "yarn login --registry=https://npm.pkg.github.com/ && yarn publish"
+		"build": "ts-node-script build.ts"
 	},
 	"dependencies": {
 		"@bazo/js-dev-scripts-types": "^0.0.2",
