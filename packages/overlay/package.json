@@ -11,7 +11,7 @@
 		"prepack": "yarn ts-node-script prepack.ts"
 	},
 	"dependencies": {
-		"@bazo/js-dev-scripts-types": "^0.0.2",
+		"@bazo/js-dev-scripts-types": "*",
 		"nano-jsx": "^0.0.16",
 		"panic-overlay": "^1.0.45",
 		"ramda": "^0.27.1",
