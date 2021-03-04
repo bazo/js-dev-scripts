@@ -1,6 +1,6 @@
 import execa from "execa";
 import { resolve } from "path";
-import { cleanBuildFolder, generatePackageJson } from "../../build-functions";
+import { cleanBuildFolder } from "../../build-functions";
 
 const buildFolder = resolve("./dist");
 
@@ -15,8 +15,6 @@ async function build(): Promise<void> {
 			cwd: process.cwd(),
 		}
 	);
-
-	generatePackageJson(buildFolder);
 }
 
 build();

@@ -10,7 +10,8 @@
 		"dist/**/*"
 	],
 	"scripts": {
-		"build": "ts-node-script build.ts"
+		"build": "ts-node-script build.ts",
+		"prepack": "ts-node-script prepack.ts"
 	},
 	"dependencies": {
 		"@bazo/js-dev-overlay": "^0.0.15",

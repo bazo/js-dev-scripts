@@ -1,5 +1,5 @@
 import * as esbuild from "esbuild";
-import { cleanBuildFolder, generatePackageJson } from "../../build-functions";
+import { cleanBuildFolder } from "../../build-functions";
 import { resolve } from "path";
 
 const buildFolder = resolve("./dist");
@@ -30,8 +30,6 @@ async function build(): Promise<void> {
 	esbuild.build(esbuildOptions);
 
 	copyFileSync("./react-shim.js", `${buildFolder}/react-shim.js`);
-
-	generatePackageJson(buildFolder);
 }
 
 build();
