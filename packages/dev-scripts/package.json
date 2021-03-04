@@ -1,10 +1,21 @@
 {
 	"name": "@bazo/js-dev-scripts",
 	"version": "0.0.7",
+	"license": "MIT",
+	"types": "./testing.d.ts",
 	"bin": {
 		"dev-scripts": "./bin/dev-scripts.ts"
 	},
-	"types": "./testing.d.ts",
+	"files": [
+		"dist/**/*"
+	],
+	"scripts": {
+		"build": "ts-node-script build.ts",
+		"prepublish": "yarn build",
+		"pub": "yarn pub:gh && yarn pub:npm",
+		"pub:npm": "yarn publish --access public",
+		"pub:gh": "yarn login --registry=https://npm.pkg.github.com/ && yarn publish"
+	},
 	"dependencies": {
 		"@bazo/js-dev-overlay": "^0.0.7",
 		"esbuild": "^0.8.54",
@@ -55,14 +66,5 @@
 		"typescript": "^4.2.2",
 		"ws": "^7.4.3"
 	},
-	"files": [
-		"dist/**/*"
-	],
-	"scripts": {
-		"build": "ts-node-script build.ts",
-		"prepublish": "yarn build",
-		"pub": "yarn pub:gh && yarn pub:npm",
-		"pub:npm": "yarn publish --access public",
-		"pub:gh": "yarn login --registry=https://npm.pkg.github.com/ && yarn publish"
-	}
+	"gitHead": "ba9c73709bb01396c9a4a06fa3f579ed7899ccca"
 }

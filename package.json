@@ -1,24 +1,29 @@
 {
 	"name": "js-dev-scripts",
 	"version": "0.0.0",
-	"workspaces": [
-		"packages/*"
-	],
 	"private": "true",
-	"license": "MIT",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/bazo/js-dev-scripts"
 	},
+	"license": "MIT",
 	"author": {
-		"email": "martin@bazo.sk",
 		"name": "Martin Bažík",
+		"email": "martin@bazo.sk",
 		"url": "https://bazo.sk"
 	},
+	"types": "./testing.d.ts",
 	"bin": {
 		"dev-scripts": "./packages/dev-scripts/bin/dev-scripts.ts"
 	},
-	"types": "./testing.d.ts",
+	"workspaces": [
+		"packages/*"
+	],
+	"scripts": {
+		"build": "lerna run build",
+		"pub:lerna": "lerna publish --contents dist --yes --registry https://npm.pkg.github.com/ && lerna publish --contents dist --yes",
+		"pub": "lerna run pub"
+	},
 	"dependencies": {
 		"dotenv": "^8.2.0",
 		"dotenv-expand": "^5.1.0",
@@ -34,10 +39,5 @@
 		"@typescript-eslint/eslint-plugin": "^4.16.1",
 		"@typescript-eslint/parser": "^4.16.1",
 		"prettier": "^2.2.1"
-	},
-	"scripts": {
-		"build": "lerna run build",
-		"pub:lerna": "lerna publish --contents dist --yes --registry https://npm.pkg.github.com/ && lerna publish --contents dist --yes",
-		"pub": "lerna run pub"
 	}
 }

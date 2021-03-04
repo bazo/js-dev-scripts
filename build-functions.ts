@@ -7,7 +7,6 @@ const repository = {
 	type: "git",
 	url: "https://github.com/bazo/js-dev-scripts",
 };
-const license = "MIT";
 const author = {
 	name: "Martin Bažík",
 	email: "martin@bazo.sk",
@@ -23,7 +22,7 @@ export function generatePackageJson(buildFolder: string) {
 	const pkg = require(`${dir}/package.json`);
 	const pkgDist = require(`${dir}/package.dist.json`);
 
-	const newPkg = sortPackageJson({ ...pkgDist, dependencies: pkg.dependencies, version: pkg.version, repository, author, license });
+	const newPkg = sortPackageJson({ ...pkgDist, dependencies: pkg.dependencies, version: pkg.version, repository, author, license: pkg.license });
 
 	writeFileSync(`${buildFolder}/package.json`, JSON.stringify(newPkg, null, 4));
 }

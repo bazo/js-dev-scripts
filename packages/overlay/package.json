@@ -1,10 +1,18 @@
 {
 	"name": "@bazo/js-dev-overlay",
 	"version": "0.0.7",
-	"publishConfig": {
-		"registry": "https://npm.pkg.github.com/"
-	},
+	"license": "MIT",
 	"main": "dist/index.js",
+	"files": [
+		"dist/**/*"
+	],
+	"scripts": {
+		"build": "ts-node-script build.ts",
+		"prepublish": "yarn build",
+		"pub": "yarn pub:gh && yarn pub:npm",
+		"pub:npm": "yarn publish --access public",
+		"pub:gh": "yarn login --registry=https://npm.pkg.github.com/ && yarn publish"
+	},
 	"dependencies": {
 		"@bazo/js-dev-scripts-types": "^0.0.2",
 		"nano-jsx": "^0.0.16",
@@ -16,14 +24,8 @@
 	"devDependencies": {
 		"@types/ws": "^7.4.0"
 	},
-	"files": [
-		"dist/**/*"
-	],
-	"scripts": {
-		"build": "ts-node-script build.ts",
-		"prepublish": "yarn build",
-		"pub": "yarn pub:gh && yarn pub:npm",
-		"pub:npm": "yarn publish --access public",
-		"pub:gh": "yarn login --registry=https://npm.pkg.github.com/ && yarn publish"
-	}
+	"publishConfig": {
+		"registry": "https://npm.pkg.github.com/"
+	},
+	"gitHead": "ba9c73709bb01396c9a4a06fa3f579ed7899ccca"
 }

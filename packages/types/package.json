@@ -1,6 +1,7 @@
 {
 	"name": "@bazo/js-dev-scripts-types",
 	"version": "0.0.6",
+	"license": "MIT",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
 	"scripts": {
@@ -9,5 +10,6 @@
 		"pub": "yarn pub:gh && yarn pub:npm",
 		"pub:npm": "yarn publish --access public",
 		"pub:gh": "yarn login --registry=https://npm.pkg.github.com/ && yarn publish"
-	}
+	},
+	"gitHead": "ba9c73709bb01396c9a4a06fa3f579ed7899ccca"
 }
