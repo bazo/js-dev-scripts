@@ -1,6 +1,6 @@
 {
 	"name": "@bazo/js-dev-scripts",
-	"version": "0.0.13",
+	"version": "0.0.14",
 	"license": "MIT",
 	"types": "./testing.d.ts",
 	"bin": {
@@ -13,7 +13,7 @@
 		"build": "ts-node-script build.ts"
 	},
 	"dependencies": {
-		"@bazo/js-dev-overlay": "^0.0.12",
+		"@bazo/js-dev-overlay": "^0.0.13",
 		"esbuild": "^0.8.54",
 		"eslint": "^7.21.0",
 		"espree": "^7.3.1",
