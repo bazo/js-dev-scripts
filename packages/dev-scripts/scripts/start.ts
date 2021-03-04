@@ -10,12 +10,13 @@ import * as nunjucks from "nunjucks";
 import * as WebSocket from "ws";
 import chalk from "chalk";
 import FileManager from "../lib/fileManager";
-import { Extname, LintResults, mimeTypes } from "../lib/types";
-import { clearConsole, createMessage, formatChokidarEvent, processLintResult } from "../lib/functions";
+import { Extname, LintResults, mimeTypes } from "@bazo/js-dev-scripts-types";
+import { createMessage, formatChokidarEvent, processLintResult } from "../lib/functions";
 import { lintFile } from "../lib/lint";
 import revHash from "rev-hash";
 //@ts-ignore
 import revPath from "rev-path";
+import globby from "globby";
 
 process.env.NODE_ENV = "development";
 const HOST = process.env.HOST || "0.0.0.0";
@@ -57,6 +58,10 @@ async function buildApp(): Promise<esbuild.BuildResult> {
 
 function getMemoryPath(filePath: string): string {
 	return `/${path.relative(buildFolder, filePath)}`;
+}
+
+function getPublicMemoryPath(filePath: string): string {
+	return `/${path.relative(publicFolder, filePath)}`;
 }
 
 async function buildPublic(builtFiles: esbuild.OutputFile[] = [], wsPort: number): Promise<void> {
@@ -102,6 +107,14 @@ async function buildPublic(builtFiles: esbuild.OutputFile[] = [], wsPort: number
 			})
 			.join(""),
 	});
+
+	const otherFiles = await globby([`${publicFolder}/**/*`, `!${publicFolder}/index.html`]);
+
+	for (const otherFile of otherFiles) {
+		fs.readFile(otherFile, (err, code) => {
+			fm.setFile(getPublicMemoryPath(otherFile), code);
+		});
+	}
 
 	fm.setFile(`/index.html`, indexCode);
 }

@@ -15,6 +15,7 @@
 	},
 	"dependencies": {
 		"@bazo/js-dev-overlay": "^0.0.19",
+		"@bazo/js-dev-scripts-types": "*",
 		"esbuild": "^0.8.54",
 		"eslint": "^7.21.0",
 		"espree": "^7.3.1",

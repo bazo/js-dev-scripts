@@ -16,6 +16,7 @@ export const mimeTypes = {
 	".eot": "application/vnd.ms-fontobject",
 	".otf": "application/font-otf",
 	".wasm": "application/wasm",
+	".ico": "image/x-icon",
 };
 
 export type Extname = keyof typeof mimeTypes;

@@ -1,11 +1,11 @@
 export default class FileManager {
-	filesMap = new Map<string, string>();
+	filesMap = new Map<string, string | Buffer>();
 
-	public setFile(name: string, contents: string): void {
+	public setFile(name: string, contents: Buffer | string): void {
 		this.filesMap.set(name, contents);
 	}
 
-	public getContents(name: string): string | undefined {
+	public getContents(name: string): string | Buffer | undefined {
 		return this.filesMap.get(name);
 	}
 
