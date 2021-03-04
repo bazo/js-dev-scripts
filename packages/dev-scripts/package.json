@@ -1,6 +1,6 @@
 {
 	"name": "@bazo/js-dev-scripts",
-	"version": "0.0.14",
+	"version": "0.0.15",
 	"license": "MIT",
 	"types": "./testing.d.ts",
 	"bin": {
