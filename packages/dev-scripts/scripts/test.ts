@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
+require("pretty-error").start();
 process.env.NODE_ENV = "development";
 
 import * as path from "path";

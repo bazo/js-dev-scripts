@@ -2,23 +2,34 @@ import { ESLint } from "eslint";
 import execa from "execa";
 import { LintResults } from "./types";
 import { GrammarItem, parse } from "@aivenio/tsc-output-parser";
+import { prefix } from "./functions";
+import chalk from "chalk";
 
 const eslint = new ESLint({
 	useEslintrc: true,
 });
 
 export async function lintFile(path: string): Promise<LintResults> {
-	const results = await eslint.lintFiles(path);
-	const { errorCount, warningCount } = results.reduce(
-		(previous, current) => {
-			return {
-				errorCount: previous.errorCount + current.errorCount,
-				warningCount: previous.warningCount + current.warningCount,
-			};
-		},
-		{ errorCount: 0, warningCount: 0 }
-	);
-	return { errorCount, warningCount, results };
+	try {
+		const results = await eslint.lintFiles(path);
+
+		const { errorCount, warningCount } = results.reduce(
+			(previous, current) => {
+				return {
+					errorCount: previous.errorCount + current.errorCount,
+					warningCount: previous.warningCount + current.warningCount,
+				};
+			},
+			{ errorCount: 0, warningCount: 0 }
+		);
+		return { errorCount, warningCount, results };
+	} catch (error) {
+		console.clear();
+		console.log(
+			`${chalk.red(prefix("eslint"))} ${error.message} (${chalk.dim(error.messageTemplate)}). \n          Check if you have eslintrc file in root.\n`
+		);
+		process.exit();
+	}
 }
 
 export async function tscLint(args: string[] = [], isDev = false): Promise<GrammarItem[]> {

@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
+require("pretty-error").start();
 import * as http from "http";
 import * as fs from "fs";
 import * as path from "path";
@@ -37,7 +38,7 @@ const esbuildOptions: esbuild.BuildOptions = {
 	write: false,
 	format: "esm",
 	incremental: true,
-	inject: [path.resolve(__dirname, "../react-shim.js")],
+	//inject: [path.resolve(__dirname, "../react-shim.js")],
 	logLevel: "error",
 };
 

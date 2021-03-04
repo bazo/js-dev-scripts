@@ -20,7 +20,8 @@
 		"@bazo/js-dev-overlay": "^0.0.10",
 		"esbuild": "^0.8.54",
 		"eslint": "^7.21.0",
-		"espree": "^7.3.1"
+		"espree": "^7.3.1",
+		"pretty-error": "^3.0.3"
 	},
 	"devDependencies": {
 		"@aivenio/tsc-output-parser": "^2.1.1",

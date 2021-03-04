@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
+require("pretty-error").start();
 import * as fs from "fs";
 import * as path from "path";
 import * as esbuild from "esbuild";

@@ -7,8 +7,7 @@ import { SourceMapConsumer, NullableMappedPosition } from "source-map";
 import { highlight } from "cli-highlight";
 import figures from "figures";
 import prettyMilliseconds from "pretty-ms";
-import convertHrtime, { HRTime } from "convert-hrtime";
-import { hrtime } from "process";
+import convertHrtime from "convert-hrtime";
 
 export function formatChokidarEvent(eventName: "add" | "addDir" | "change" | "unlink" | "unlinkDir", path: string): string {
 	switch (eventName) {
