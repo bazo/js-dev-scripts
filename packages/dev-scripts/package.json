@@ -1,6 +1,6 @@
 {
 	"name": "@bazo/js-dev-scripts",
-	"version": "0.0.16",
+	"version": "0.0.12",
 	"license": "MIT",
 	"types": "./testing.d.ts",
 	"bin": {
@@ -63,5 +63,9 @@
 		"typescript": "^4.2.2",
 		"ws": "^7.4.3"
 	},
-	"gitHead": "1c967484cb30869cd5a96478dd4235b5e76612f5"
+	"publishConfig": {
+		"access": "public",
+		"allow-same-version": true
+	},
+	"gitHead": "cf976ce8dee31ef42e4104bd5c3f51954e26bd21"
 }

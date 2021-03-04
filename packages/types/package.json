@@ -1,11 +1,15 @@
 {
 	"name": "@bazo/js-dev-scripts-types",
-	"version": "0.0.14",
+	"version": "0.0.10",
 	"license": "MIT",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
 	"scripts": {
 		"build": "ts-node-script build.ts"
 	},
-	"gitHead": "1c967484cb30869cd5a96478dd4235b5e76612f5"
+	"publishConfig": {
+		"access": "public",
+		"allow-same-version": true
+	},
+	"gitHead": "cf976ce8dee31ef42e4104bd5c3f51954e26bd21"
 }
