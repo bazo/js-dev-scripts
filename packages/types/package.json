@@ -1,16 +1,16 @@
 {
 	"name": "@bazo/js-dev-scripts-types",
-	"version": "0.0.15",
+	"version": "0.0.16",
 	"license": "MIT",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
 	"scripts": {
 		"build": "ts-node-script build.ts",
-		"prepack": "ts-node-script prepack.ts"
+		"prepack": "yarn ts-node-script prepack.ts"
 	},
 	"publishConfig": {
 		"access": "public",
 		"allow-same-version": true
 	},
-	"gitHead": "42b81a4a601b48a76f42b52ccce519a018570107"
+	"gitHead": "bdd06eea033bf1e6418be4ad909ff494907fb959"
 }
