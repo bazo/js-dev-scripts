@@ -13,16 +13,24 @@ const author = {
 	url: "https://bazo.sk",
 };
 
-export function cleanBuildFolder(buildFolder: string) {
+export function cleanBuildFolder(buildFolder: string): void {
 	del.sync([`${buildFolder}/**`, `!${buildFolder}`]);
 }
 
-export function generatePackageJson(buildFolder: string) {
+export function generatePackageJson(buildFolder: string): void {
 	const dir = dirname(buildFolder);
 	const pkg = require(`${dir}/package.json`);
 	const pkgDist = require(`${dir}/package.dist.json`);
 
-	const newPkg = sortPackageJson({ ...pkgDist, dependencies: pkg.dependencies, version: pkg.version, repository, author, license: pkg.license });
+	const newPkg = sortPackageJson({
+		...pkgDist,
+		dependencies: pkg.dependencies,
+		version: pkg.version,
+		repository,
+		author,
+		license: pkg.license,
+		name: pkg.name,
+	});
 
 	writeFileSync(`${buildFolder}/package.json`, JSON.stringify(newPkg, null, 4));
 }
