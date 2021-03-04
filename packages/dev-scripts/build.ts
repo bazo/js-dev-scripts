@@ -1,8 +1,9 @@
 import * as esbuild from "esbuild";
-import { copyFileSync, writeFileSync } from "fs";
-import del from "del";
+import { cleanBuildFolder, generatePackageJson } from "../../build-functions";
+import { resolve } from "path";
 
-const buildFolder = "./dist";
+const buildFolder = resolve("./dist");
+import { copyFileSync } from "fs";
 
 const esbuildOptions: esbuild.BuildOptions = {
 	outdir: buildFolder,
@@ -13,7 +14,7 @@ const esbuildOptions: esbuild.BuildOptions = {
 	},
 	color: true,
 	write: true,
-	//minify: true,
+	minify: true,
 	logLevel: "error",
 	target: "node15",
 	platform: "node",
@@ -24,21 +25,13 @@ const esbuildOptions: esbuild.BuildOptions = {
 	external: ["esbuild", "@bazo/js-dev-overlay", "eslint", "espree"],
 };
 
-function cleanBuildFolder() {
-	del.sync([`${buildFolder}/**`, `!${buildFolder}`]);
-}
-
 async function build(): Promise<void> {
-	cleanBuildFolder();
-	const r = await esbuild.build(esbuildOptions);
-	console.log(r);
+	cleanBuildFolder(buildFolder);
+	esbuild.build(esbuildOptions);
 
 	copyFileSync("./react-shim.js", `${buildFolder}/react-shim.js`);
 
-	const pkg = require("./package.json");
-	const pkgDist = require("./package.dist.json");
-
-	writeFileSync(`${buildFolder}/package.json`, JSON.stringify({ ...pkgDist, dependencies: pkg.dependencies, version: pkg.version }));
+	generatePackageJson(buildFolder);
 }
 
 build();

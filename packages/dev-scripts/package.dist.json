@@ -1,16 +1,4 @@
 {
-	"name": "@bazo/js-dev-scripts",
-	"version": "0.0.4",
-	"license": "MIT",
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/bazo/js-dev-scripts"
-	},
-	"author": {
-		"email": "martin@bazo.sk",
-		"name": "Martin Bažík",
-		"url": "https://bazo.sk"
-	},
 	"bin": {
 		"dev-scripts": "./bin/dev-scripts.js"
 	},

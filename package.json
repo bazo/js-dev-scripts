@@ -22,9 +22,10 @@
 	"dependencies": {
 		"dotenv": "^8.2.0",
 		"dotenv-expand": "^5.1.0",
-		"esbuild": "^0.8.54",
+		"esbuild": "^0.8.55",
 		"eslint": "^7.21.0",
 		"lerna": "^4.0.0",
+		"sort-package-json": "^1.49.0",
 		"typescript": "^4.2.2"
 	},
 	"devDependencies": {
@@ -36,7 +37,7 @@
 	},
 	"scripts": {
 		"build": "lerna run build",
-		"pub:lerna": "lerna publish --yes --registry https://npm.pkg.github.com/ && lerna publish --yes",
+		"pub:lerna": "lerna publish --contents dist --yes --registry https://npm.pkg.github.com/ && lerna publish --contents dist --yes",
 		"pub": "lerna run pub"
 	}
 }
