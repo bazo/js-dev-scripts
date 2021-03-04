@@ -34,6 +34,7 @@ async function build(): Promise<void> {
 	console.log(r);
 
 	copyFileSync("./react-shim.js", `${buildFolder}/react-shim.js`);
+	copyFileSync("./package.json.dist", `${buildFolder}/package.json`);
 }
 
 build();

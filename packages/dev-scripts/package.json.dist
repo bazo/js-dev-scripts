@@ -1,0 +1,24 @@
+{
+	"name": "@bazo/js-dev-scripts",
+	"version": "0.0.4",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/bazo/js-dev-scripts"
+	},
+	"author": {
+		"email": "martin@bazo.sk",
+		"name": "Martin Bažík",
+		"url": "https://bazo.sk"
+	},
+	"bin": {
+		"dev-scripts": "./bin/dev-scripts.ts"
+	},
+	"types": "./testing.d.ts",
+	"dependencies": {
+		"@bazo/js-dev-overlay": "^0.0.6",
+		"esbuild": "^0.8.54",
+		"eslint": "^7.21.0",
+		"espree": "^7.3.1"
+	}
+}
