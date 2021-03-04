@@ -11,5 +11,5 @@
 		"pub:npm": "yarn publish --access public",
 		"pub:gh": "yarn login --registry=https://npm.pkg.github.com/ && yarn publish"
 	},
-	"gitHead": "ba9c73709bb01396c9a4a06fa3f579ed7899ccca"
+	"gitHead": "146a855cca7413aefccdd0bac61609fbc50b0214"
 }
