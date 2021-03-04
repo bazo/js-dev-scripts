@@ -190,7 +190,10 @@ async function start() {
 		buildPublic(outputFiles, port);
 	}
 
-	chokidar.watch(srcFolder, { awaitWriteFinish: false, ignoreInitial: true }).on("all", async (event, path) => {
+	const testGlob = `${srcFolder}/**/*.test.(ts|tsx|js|jsx)`;
+	const srcGlob = `${srcFolder}/**/*(?!test).(ts|tsx|js|jsx)`;
+
+	chokidar.watch(srcGlob, { awaitWriteFinish: false, ignoreInitial: true, ignored: testGlob }).on("all", async (event, path) => {
 		if (!["change"].includes(event)) {
 			return;
 		}

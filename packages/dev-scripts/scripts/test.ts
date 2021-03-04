@@ -147,8 +147,8 @@ async function printTestReport(allResults: ResultsWithSource[]): Promise<void> {
 async function test() {
 	console.clear();
 
-	const testGlob = `${srcFolder}/**/*.test.(ts|tsx)`;
-	const srcGlob = `${srcFolder}/**/*(?!test).(ts|tsx)`;
+	const testGlob = `${srcFolder}/**/*.test.(ts|tsx|js|jsx)`;
+	const srcGlob = `${srcFolder}/**/*(?!test).(ts|tsx|js|jsx)`;
 
 	const tm = new TestMemory();
 
