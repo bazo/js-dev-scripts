@@ -1,11 +1,11 @@
 {
 	"name": "@bazo/js-dev-scripts-types",
-	"version": "0.0.13",
+	"version": "0.0.14",
 	"license": "MIT",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
 	"scripts": {
 		"build": "ts-node-script build.ts"
 	},
-	"gitHead": "5af0e015823b6c0f1e2727b6ee10263148d1de90"
+	"gitHead": "1c967484cb30869cd5a96478dd4235b5e76612f5"
 }
