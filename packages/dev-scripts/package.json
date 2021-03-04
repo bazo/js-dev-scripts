@@ -1,6 +1,6 @@
 {
 	"name": "@bazo/js-dev-scripts",
-	"version": "0.0.9",
+	"version": "0.0.10",
 	"license": "MIT",
 	"types": "./testing.d.ts",
 	"bin": {
@@ -17,7 +17,7 @@
 		"pub:gh": "yarn login --registry=https://npm.pkg.github.com/ && yarn publish"
 	},
 	"dependencies": {
-		"@bazo/js-dev-overlay": "^0.0.9",
+		"@bazo/js-dev-overlay": "^0.0.10",
 		"esbuild": "^0.8.54",
 		"eslint": "^7.21.0",
 		"espree": "^7.3.1"
