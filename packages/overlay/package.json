@@ -1,6 +1,6 @@
 {
 	"name": "@bazo/js-dev-overlay",
-	"version": "0.0.13",
+	"version": "0.0.14",
 	"license": "MIT",
 	"main": "dist/index.js",
 	"files": [
@@ -23,5 +23,5 @@
 	"publishConfig": {
 		"registry": "https://npm.pkg.github.com/"
 	},
-	"gitHead": "7e0a21e5d10945df02cc1133bb93f3c72bdfe999"
+	"gitHead": "5af0e015823b6c0f1e2727b6ee10263148d1de90"
 }
