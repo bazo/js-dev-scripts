@@ -4,6 +4,7 @@ import { resolve } from "path";
 
 const buildFolder = resolve("./dist");
 import { copyFileSync } from "fs";
+import execa from "execa";
 
 const esbuildOptions: esbuild.BuildOptions = {
 	outdir: buildFolder,
@@ -29,8 +30,13 @@ async function build(): Promise<void> {
 	cleanBuildFolder(buildFolder);
 	esbuild.build(esbuildOptions);
 
+	await execa.command(`tsc --project ./types/tsconfig.json`, {
+		extendEnv: true,
+		windowsHide: false,
+		cwd: process.cwd(),
+	});
+
 	copyFileSync("./react-shim.js", `${buildFolder}/react-shim.js`);
-	copyFileSync("./testing.d.ts", `${buildFolder}/testing.d.ts`);
 }
 
 build();
