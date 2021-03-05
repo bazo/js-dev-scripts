@@ -24,6 +24,7 @@ export function generatePackageJson(buildFolder: string): void {
 
 	const newPkg = sortPackageJson({
 		...pkgDist,
+		dependencies: pkg.dependencies,
 		version: pkg.version,
 		repository,
 		author,
