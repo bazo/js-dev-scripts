@@ -11,12 +11,14 @@
 	],
 	"scripts": {
 		"build": "ts-node-script build.ts",
-		"prepack": "yarn ts-node-script prepack.ts"
+		"prepack": "yarn ts-node-script prepack.ts",
+		"ncu": "ncu",
+		"ncu:u": "ncu -u"
 	},
 	"dependencies": {
 		"@bazo/js-dev-overlay": "^0.0.22",
 		"@bazo/js-dev-scripts-types": "^0.0.19",
-		"esbuild": "^0.8.54",
+		"esbuild": "^0.8.55",
 		"eslint": "^7.21.0",
 		"espree": "^7.3.1",
 		"pretty-error": "^3.0.3"
@@ -37,7 +39,7 @@
 		"cli-highlight": "^2.1.10",
 		"convert-hrtime": "^3.0.0",
 		"cosmiconfig": "^7.0.0",
-		"cpy": "^8.1.1",
+		"cpy": "^8.1.2",
 		"cross-spawn": "^7.0.3",
 		"del": "^6.0.0",
 		"dotenv": "^8.2.0",
@@ -62,7 +64,7 @@
 		"source-map-url": "^0.4.1",
 		"ts-node": "^9.1.1",
 		"ts-node-dev": "^1.1.6",
-		"typescript": "^4.2.2",
+		"typescript": "^4.2.3",
 		"ws": "^7.4.3"
 	},
 	"publishConfig": {

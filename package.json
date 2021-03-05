@@ -22,7 +22,9 @@
 	"scripts": {
 		"build": "lerna run build",
 		"pub": "yarn build && lerna publish --contents dist --yes && lerna publish --contents dist --yes --registry https://npm.pkg.github.com/",
-		"package:sort": "yarn sort-package-json packages/**/package.json"
+		"package:sort": "yarn sort-package-json packages/**/package.json",
+		"ncu": "lerna run ncu",
+		"ncu:u": "lerna run ncu:u"
 	},
 	"dependencies": {
 		"dotenv": "^8.2.0",

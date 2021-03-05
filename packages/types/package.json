@@ -5,7 +5,9 @@
 	"main": "index.ts",
 	"scripts": {
 		"build": "ts-node-script build.ts",
-		"prepack": "yarn ts-node-script prepack.ts"
+		"prepack": "yarn ts-node-script prepack.ts",
+		"ncu": "ncu",
+		"ncu:u": "ncu -u"
 	},
 	"publishConfig": {
 		"access": "public",

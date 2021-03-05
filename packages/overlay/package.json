@@ -8,7 +8,9 @@
 	],
 	"scripts": {
 		"build": "ts-node-script build.ts",
-		"prepack": "yarn ts-node-script prepack.ts"
+		"prepack": "yarn ts-node-script prepack.ts",
+		"ncu": "ncu",
+		"ncu:u": "ncu -u"
 	},
 	"dependencies": {
 		"@bazo/js-dev-scripts-types": "^0.0.19",
