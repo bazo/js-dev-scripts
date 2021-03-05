@@ -2,5 +2,5 @@
 	"bin": {
 		"dev-scripts": "./bin/dev-scripts.js"
 	},
-	"types": "./testing.d.ts"
+	"types": "./index.d.ts"
 }
