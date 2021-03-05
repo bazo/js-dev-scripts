@@ -1,12 +1,13 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /*
 declare var beforeAll: testing.Lifecycle;
 declare var beforeEach: testing.Lifecycle;
 declare var afterAll: testing.Lifecycle;
 declare var afterEach: testing.Lifecycle;
 */
-declare var describe: testing.Describe;
-declare var test: testing.It;
-declare var run: () => void;
+declare const describe: testing.Describe;
+declare const test: testing.It;
+declare const run: () => void;
 //declare var xtest: testing.It;
 
 //declare const expect: testing.Expect;
@@ -51,11 +52,13 @@ declare namespace testing {
 		fail(error?: string | { message: string }): any;
 	}
 
-	type ProvidesCallback = (cb: DoneCallback) => any;
+	type ProvidesCallback = (cb: DoneCallback) => any | Promise<any>;
 
 	interface FunctionLike {
 		readonly name: string;
 	}
+
+	type NameFunction = () => string | Promise<string>;
 
 	type EmptyFunction = () => void;
 
@@ -81,7 +84,7 @@ declare namespace testing {
 		 * @param fn The function for your test
 		 * @param timeout The timeout for an async function test
 		 */
-		(name: string, fn?: ProvidesCallback, timeout?: number): void;
+		(name: number | string | NameFunction | FunctionLike, fn?: ProvidesCallback, timeout?: number): void;
 		/**
 		 * Only runs this test in the current file.
 		 */
@@ -142,12 +145,6 @@ declare namespace testing {
 	}
 
 	interface Describe {
-		// tslint:disable-next-line ban-types
-		(name: number | string | Function | FunctionLike, fn: EmptyFunction): void;
-		/** Only runs the tests inside this `describe` for the current file */
-		only: Describe;
-		/** Skips running the tests inside this `describe` for the current file */
-		skip: Describe;
-		each: Each;
+		(name: number | string | NameFunction | FunctionLike, fn: EmptyFunction): void;
 	}
 }

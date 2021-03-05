@@ -30,6 +30,7 @@ async function build(): Promise<void> {
 	esbuild.build(esbuildOptions);
 
 	copyFileSync("./react-shim.js", `${buildFolder}/react-shim.js`);
+	copyFileSync("./testing.d.ts", `${buildFolder}/testing.d.ts`);
 }
 
 build();
