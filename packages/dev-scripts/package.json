@@ -1,6 +1,6 @@
 {
 	"name": "@bazo/js-dev-scripts",
-	"version": "0.0.29",
+	"version": "0.0.30",
 	"license": "MIT",
 	"types": "./testing.d.ts",
 	"bin": {
@@ -16,7 +16,7 @@
 		"ncu:u": "ncu -u"
 	},
 	"dependencies": {
-		"@bazo/js-dev-overlay": "^0.0.23",
+		"@bazo/js-dev-overlay": "^0.0.24",
 		"@bazo/js-dev-scripts-types": "^0.0.20",
 		"esbuild": "^0.8.55",
 		"eslint": "^7.21.0",
