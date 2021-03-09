@@ -23,7 +23,7 @@ const esbuildOptions: esbuild.BuildOptions = {
 	pure: [],
 	tsconfig: "./tsconfig.build.json",
 	bundle: true,
-	external: ["esbuild", "@bazo/js-dev-overlay", "eslint", "espree"],
+	external: ["esbuild", "@bazo/js-dev-overlay", "eslint", "espree", "expect"],
 };
 
 async function build(): Promise<void> {
@@ -37,6 +37,7 @@ async function build(): Promise<void> {
 	});
 
 	copyFileSync("./react-shim.js", `${buildFolder}/react-shim.js`);
+	copyFileSync("./env.d.ts", `${buildFolder}/env.d.ts`);
 }
 
 build();

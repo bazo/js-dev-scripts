@@ -17,18 +17,16 @@ import revHash from "rev-hash";
 //@ts-ignore
 import revPath from "rev-path";
 import globby from "globby";
+import { DevScriptsConfig, findPublicHTMLFileForEntryPoint, loadConfig } from "../lib/config";
 
 process.env.NODE_ENV = "development";
 const HOST = process.env.HOST || "0.0.0.0";
 
-const cwd = process.cwd();
-const buildFolder = path.resolve(cwd, "./build");
-const srcFolder = path.resolve(cwd, "./src");
-const publicFolder = path.resolve(cwd, "./public");
-const indexFile = path.resolve(cwd, publicFolder, "index.html");
+const config = loadConfig();
+
+const { testGlob, srcGlob, srcFolder, buildFolder, publicFolder } = config;
 
 const esbuildOptions: esbuild.BuildOptions = {
-	entryPoints: [srcFolder + "/index.tsx"],
 	sourcemap: true,
 	define: {
 		"process.env.NODE_ENV": '"development"',
@@ -52,9 +50,9 @@ fm.setFile("/dev.js", devJS);
 async function lintApp(): Promise<LintResults> {
 	return lintFile(srcFolder);
 }
-async function buildApp(): Promise<[Error | null, esbuild.BuildResult | Partial<esbuild.BuildResult>]> {
+async function buildApp(entryPoint: string): Promise<[Error | null, esbuild.BuildResult | Partial<esbuild.BuildResult>]> {
 	try {
-		return [null, await esbuild.build(esbuildOptions)];
+		return [null, await esbuild.build({ ...esbuildOptions, entryPoints: [entryPoint] })];
 	} catch (error) {
 		console.log(error.message);
 		return [error, { outputFiles: [] }];
@@ -69,7 +67,7 @@ function getPublicMemoryPath(filePath: string): string {
 	return `/${path.relative(publicFolder, filePath)}`;
 }
 
-async function buildPublic(builtFiles: esbuild.OutputFile[] = [], wsPort: number): Promise<void> {
+async function buildPublic(htmlFile: string, builtFiles: esbuild.OutputFile[] = [], wsPort: number): Promise<void> {
 	if (builtFiles.length === 0) {
 		return;
 	}
@@ -101,7 +99,7 @@ async function buildPublic(builtFiles: esbuild.OutputFile[] = [], wsPort: number
 		fm.setFile(getMemoryPath(file.path), file.text);
 	}
 
-	const indexCode = nunjucks.render(indexFile, {
+	const htmlCode = nunjucks.render(htmlFile, {
 		bundle_script:
 			`<script charset="utf-8">window.WEBSOCKET_PORT=${wsPort.toString()};</script><script charset="utf-8" src="/dev.js" type="module"></script>` +
 			jsFiles
@@ -116,6 +114,11 @@ async function buildPublic(builtFiles: esbuild.OutputFile[] = [], wsPort: number
 			.join(""),
 	});
 
+	const { name } = path.parse(htmlFile);
+	fm.setFile(`/${name}.html`, htmlCode);
+}
+
+async function build(config: DevScriptsConfig, wsPort: number): Promise<void> {
 	const otherFiles = await globby([`${publicFolder}/**/*`, `!${publicFolder}/index.html`]);
 
 	for (const otherFile of otherFiles) {
@@ -124,7 +127,14 @@ async function buildPublic(builtFiles: esbuild.OutputFile[] = [], wsPort: number
 		});
 	}
 
-	fm.setFile(`/index.html`, indexCode);
+	for (const entryPoint of config.entryPoints) {
+		console.log({ entryPoint });
+		const [error, { outputFiles }] = await buildApp(entryPoint);
+		const htmlFile = await findPublicHTMLFileForEntryPoint(entryPoint, config);
+		if (htmlFile) {
+			buildPublic(htmlFile, outputFiles, wsPort);
+		}
+	}
 }
 
 async function startServer(port: number): Promise<WebSocket.Server> {
@@ -182,12 +192,11 @@ async function startServer(port: number): Promise<WebSocket.Server> {
 let wss: WebSocket.Server;
 async function start() {
 	console.clear();
-	const preferredPort = parseInt(process.env.PORT || "3000");
+
+	const preferredPort = process.env.PORT ? parseInt(process.env.PORT) : config.port;
 	const port = await getPort({ port: preferredPort });
 
 	wss = await startServer(port);
-
-	const lintResult = await lintApp();
 
 	const notifyBuildStart = () => {
 		if (wss) {
@@ -205,14 +214,15 @@ async function start() {
 		}
 	};
 
+	const lintResult = await lintApp();
 	processLintResult(lintResult);
-	if (lintResult.errorCount === 0) {
-		const [error, { outputFiles }] = await buildApp();
+	if (lintResult.errorCount === 0 || config.buildOnLintError) {
+		/*
+		const [error, { outputFiles }] = await buildApp(config);
 		buildPublic(outputFiles, port);
+		*/
+		build(config, port);
 	}
-
-	const testGlob = `${srcFolder}/**/*.test.(ts|tsx|js|jsx)`;
-	const srcGlob = `${srcFolder}/**/*(?!test).(ts|tsx|js|jsx)`;
 
 	chokidar.watch(srcGlob, { awaitWriteFinish: false, ignoreInitial: true, ignored: testGlob }).on("all", async (event, path) => {
 		if (!["change"].includes(event)) {
@@ -222,13 +232,16 @@ async function start() {
 		console.log(formatChokidarEvent(event, path));
 
 		notifyBuildStart();
-		const lintResult = await lintFile(path);
+		const lintResult = await lintApp();
 
 		processLintResult(lintResult);
 
-		if (lintResult.errorCount === 0) {
-			const [error, { outputFiles }] = await buildApp();
+		if (lintResult.errorCount === 0 || config.buildOnLintError) {
+			/*
+			const [error, { outputFiles }] = await buildApp(config);
 			buildPublic(outputFiles, port);
+			*/
+			build(config, port);
 		}
 		notifyBuildEnd();
 	});
@@ -241,8 +254,11 @@ async function start() {
 		console.log(formatChokidarEvent(event, path));
 
 		notifyBuildStart();
-		const [error, { outputFiles }] = await buildApp();
+		/*
+		const [error, { outputFiles }] = await buildApp(config);
 		buildPublic(outputFiles, port);
+		*/
+		build(config, port);
 		notifyBuildEnd();
 	});
 }
