@@ -18,13 +18,6 @@ process.on("unhandledRejection", (err) => {
 const spawn = require("cross-spawn");
 const path = require("path");
 
-const dotenv = require("dotenv");
-const env = dotenv.config({
-	path: path.resolve(__dirname, "../.env"),
-});
-const dotenvExpand = require("dotenv-expand");
-dotenvExpand(env);
-
 const args = process.argv.slice(2);
 
 const scriptIndex = args.findIndex((x) => x === "build" || x === "start" || x === "test");
@@ -36,7 +29,7 @@ let execPath = "node";
 const fileExt = process.env.FILE_EXT || "ts";
 
 /* @__PURE__ */
-if (process.env.MODE !== "production") {
+if (process.env.__DEV_SCRIPTS_MODE !== "production") {
 	execPath = path.resolve(__dirname, "../node_modules/.bin/ts-node-script");
 	if (script === "start") {
 		execPath = path.resolve(__dirname, "../node_modules/.bin/ts-node-dev");

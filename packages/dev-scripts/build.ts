@@ -19,22 +19,16 @@ const esbuildOptions: esbuild.BuildOptions = {
 	logLevel: "error",
 	target: "node15",
 	platform: "node",
-	entryPoints: ["bin/dev-scripts.ts", "scripts/build.ts", "scripts/start.ts", "scripts/test.ts"],
+	entryPoints: ["bin/dev-scripts.ts", "scripts/build.ts", "scripts/start.ts", "scripts/test.ts", "plugins/postcss.ts", "plugins/scss.ts"],
 	pure: [],
 	tsconfig: "./tsconfig.build.json",
 	bundle: true,
-	external: ["esbuild", "@bazo/js-dev-overlay", "eslint", "espree", "expect"],
+	external: ["esbuild", "@bazo/js-dev-overlay", "eslint", "espree", "expect", "sass"],
 };
 
 async function build(): Promise<void> {
 	cleanBuildFolder(buildFolder);
 	esbuild.build(esbuildOptions);
-
-	await execa.command(`tsc --project ./types/tsconfig.json`, {
-		extendEnv: true,
-		windowsHide: false,
-		cwd: process.cwd(),
-	});
 
 	copyFileSync("./react-shim.js", `${buildFolder}/react-shim.js`);
 	copyFileSync("./env.d.ts", `${buildFolder}/env.d.ts`);

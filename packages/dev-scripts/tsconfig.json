@@ -7,8 +7,8 @@
 		"noEmit": true,
 		"noFallthroughCasesInSwitch": true,
 		"esModuleInterop": true,
-		"moduleResolution": "node",
+		"moduleResolution": "node"
 		
 	},
-	"include": ["bin/*", "scripts/*", "lib/*", "build.ts"]
+	"include": ["bin/*", "scripts/*", "lib/*",  "plugins/*", "build.ts"]
 }

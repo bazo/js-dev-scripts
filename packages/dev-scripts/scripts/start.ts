@@ -17,7 +17,14 @@ import revHash from "rev-hash";
 //@ts-ignore
 import revPath from "rev-path";
 import globby from "globby";
-import { DevScriptsConfig, findPublicHTMLFileForEntryPoint, loadConfig } from "../lib/config";
+import {
+	DevScriptsConfig,
+	envVarsDefinitionsToTemplateVars,
+	findPublicHTMLFileForEntryPoint,
+	getEnvVarsDefinitions,
+	loadConfig,
+} from "../lib/config";
+import postcssPlugin from "../plugins/postcss";
 
 process.env.NODE_ENV = "development";
 const HOST = process.env.HOST || "0.0.0.0";
@@ -26,11 +33,14 @@ const config = loadConfig();
 
 const { testGlob, srcGlob, srcFolder, buildFolder, publicFolder } = config;
 
+const envVarsDefinitions = {
+	"process.env.NODE_ENV": '"development"',
+	...getEnvVarsDefinitions(),
+};
+
 const esbuildOptions: esbuild.BuildOptions = {
 	sourcemap: true,
-	define: {
-		"process.env.NODE_ENV": '"development"',
-	},
+	define: envVarsDefinitions,
 	outdir: buildFolder,
 	bundle: true,
 	color: true,
@@ -39,7 +49,26 @@ const esbuildOptions: esbuild.BuildOptions = {
 	incremental: true,
 	//inject: [path.resolve(__dirname, "../react-shim.js")],
 	logLevel: "error",
+	plugins: [...config.plugins, postcssPlugin()],
+	/*
+	loader: {
+		".png": "file",
+		".svg": "file",
+		".eot": "file",
+		".woff": "file",
+		".woff2": "file",
+		".ttf": "file",
+		".jpg": "file",
+		".jpeg": "file",
+	},
+	*/
+	publicPath: publicFolder,
+	external: ["*.png", "*.svg", "*.eot", "*.woff", "*.woff2", "*.ttf", "*.jpg", "*.jpeg"],
 };
+
+nunjucks.configure({
+	noCache: true,
+});
 
 const fm = new FileManager();
 
@@ -54,7 +83,7 @@ async function buildApp(entryPoint: string): Promise<[Error | null, esbuild.Buil
 	try {
 		return [null, await esbuild.build({ ...esbuildOptions, entryPoints: [entryPoint] })];
 	} catch (error) {
-		console.log(error.message);
+		console.log(error);
 		return [error, { outputFiles: [] }];
 	}
 }
@@ -98,7 +127,6 @@ async function buildPublic(htmlFile: string, builtFiles: esbuild.OutputFile[] = 
 
 		fm.setFile(getMemoryPath(file.path), file.text);
 	}
-
 	const htmlCode = nunjucks.render(htmlFile, {
 		bundle_script:
 			`<script charset="utf-8">window.WEBSOCKET_PORT=${wsPort.toString()};</script><script charset="utf-8" src="/dev.js" type="module"></script>` +
@@ -112,6 +140,7 @@ async function buildPublic(htmlFile: string, builtFiles: esbuild.OutputFile[] = 
 				return `<link href="${getMemoryPath(file.path)}" rel="stylesheet" />`;
 			})
 			.join(""),
+		...envVarsDefinitionsToTemplateVars(envVarsDefinitions),
 	});
 
 	const { name } = path.parse(htmlFile);
@@ -128,7 +157,6 @@ async function build(config: DevScriptsConfig, wsPort: number): Promise<void> {
 	}
 
 	for (const entryPoint of config.entryPoints) {
-		console.log({ entryPoint });
 		const [error, { outputFiles }] = await buildApp(entryPoint);
 		const htmlFile = await findPublicHTMLFileForEntryPoint(entryPoint, config);
 		if (htmlFile) {
@@ -217,10 +245,6 @@ async function start() {
 	const lintResult = await lintApp();
 	processLintResult(lintResult);
 	if (lintResult.errorCount === 0 || config.buildOnLintError) {
-		/*
-		const [error, { outputFiles }] = await buildApp(config);
-		buildPublic(outputFiles, port);
-		*/
 		build(config, port);
 	}
 
@@ -237,11 +261,7 @@ async function start() {
 		processLintResult(lintResult);
 
 		if (lintResult.errorCount === 0 || config.buildOnLintError) {
-			/*
-			const [error, { outputFiles }] = await buildApp(config);
-			buildPublic(outputFiles, port);
-			*/
-			build(config, port);
+			await build(config, port);
 		}
 		notifyBuildEnd();
 	});
@@ -254,11 +274,8 @@ async function start() {
 		console.log(formatChokidarEvent(event, path));
 
 		notifyBuildStart();
-		/*
-		const [error, { outputFiles }] = await buildApp(config);
-		buildPublic(outputFiles, port);
-		*/
-		build(config, port);
+
+		await build(config, port);
 		notifyBuildEnd();
 	});
 }

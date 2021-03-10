@@ -8,8 +8,10 @@ const defaultConfig = {
 	entryPoints: ["index.tsx"],
 	buildFolder: "./build",
 	publicFolder: "./public",
+	tempFolder: "./temp",
 	testGlob: `**/*.test.(ts|tsx|js|jsx)`,
 	srcGlob: `**/*(?!test).(ts|tsx|js|jsx)`,
+	plugins: [],
 	port: 3000,
 	buildOnLintError: true,
 };
@@ -27,8 +29,10 @@ export function loadConfig(): DevScriptsConfig {
 		entryPoints: config.entryPoints.map((entryPoint: string) => `${srcFolder}/${entryPoint}`),
 		buildFolder: path.resolve(cwd, config.buildFolder),
 		publicFolder: path.resolve(cwd, config.publicFolder),
+		tempFolder: path.resolve(cwd, config.tempFolder),
 		testGlob: `${srcFolder}/**/*.test.(ts|tsx|js|jsx)`,
-		srcGlob: `${srcFolder}/**/*(?!test).(ts|tsx|js|jsx)`,
+		srcGlob: `${srcFolder}/**/*(?!test).*`,
+		plugins: config.plugins,
 		port: config.port,
 		buildOnLintError: config.buildOnLintError,
 	};
@@ -47,4 +51,24 @@ export async function findPublicHTMLFileForEntryPoint(entryPoint: string, config
 			}
 		});
 	});
+}
+
+export function getEnvVarsDefinitions(): Record<string, string> {
+	return Object.entries(process.env)
+		.filter(([key, value]) => {
+			return key.startsWith("APP_") || key.startsWith("JS_APP_") || key.startsWith("REACT_APP_");
+		})
+		.reduce((acc, [key, value]) => {
+			return { ...acc, [`process.env.${key}`]: `"${value}"` };
+		}, {});
+}
+
+export function envVarsDefinitionsToTemplateVars(definitions: Record<string, string>): Record<string, string> {
+	return Object.entries(definitions)
+		.map(([key, value]) => {
+			return [key.replace("process.env.", ""), value];
+		})
+		.reduce((acc, [key, value]) => {
+			return { ...acc, [key]: value.replaceAll(`"`, "") };
+		}, {});
 }
