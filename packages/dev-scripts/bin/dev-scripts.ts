@@ -7,10 +7,12 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+if (process.env.__DEV_SCRIPTS_MODE === "development") {
+	require("pretty-error").start();
+}
 // Makes the script crash on unhandled rejections instead of silently
 // ignoring them. In the future, promise rejections that are not handled will
 // terminate the Node.js process with a non-zero exit code.
-require("pretty-error").start();
 process.on("unhandledRejection", (err) => {
 	throw err;
 });
@@ -42,7 +44,6 @@ if (process.env.__DEV_SCRIPTS_MODE === "development") {
 		]);
 	}
 }
-
 
 if (["build", "start", "test"].includes(script)) {
 	nodeArgs = nodeArgs.concat(require.resolve(`../scripts/${script}.${fileExt}`)).concat(args.slice(scriptIndex + 1));

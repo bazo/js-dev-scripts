@@ -4,7 +4,6 @@ import { resolve } from "path";
 
 const buildFolder = resolve("./dist");
 import { copyFileSync } from "fs";
-import execa from "execa";
 
 const esbuildOptions: esbuild.BuildOptions = {
 	outdir: buildFolder,
@@ -23,7 +22,7 @@ const esbuildOptions: esbuild.BuildOptions = {
 	pure: [],
 	tsconfig: "./tsconfig.build.json",
 	bundle: true,
-	external: ["esbuild", "@bazo/js-dev-overlay", "eslint", "espree", "expect", "sass"],
+	external: ["esbuild", "@bazo/js-dev-overlay", "eslint", "espree", "expect", "sass", "pretty-error"],
 };
 
 async function build(): Promise<void> {
