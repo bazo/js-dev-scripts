@@ -19,7 +19,7 @@ const esbuildOptions: esbuild.BuildOptions = {
 	logLevel: "error",
 	target: "node15",
 	platform: "node",
-	entryPoints: ["bin/dev-scripts.ts", "scripts/build.ts", "scripts/start.ts", "scripts/test.ts", "plugins/postcss.ts", "plugins/scss.ts"],
+	entryPoints: ["bin/dev-scripts.ts", "scripts/build.ts", "scripts/start.ts", "scripts/test.ts", "plugins/postcss.ts", "plugins/scss.ts", "plugins/external.ts"],
 	pure: [],
 	tsconfig: "./tsconfig.build.json",
 	bundle: true,
