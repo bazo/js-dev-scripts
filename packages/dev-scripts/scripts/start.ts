@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-require("pretty-error").start();
 import * as http from "http";
 import * as fs from "fs";
 import * as path from "path";
