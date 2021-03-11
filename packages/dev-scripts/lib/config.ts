@@ -14,6 +14,9 @@ const defaultConfig = {
 	plugins: [],
 	port: 3000,
 	buildOnLintError: true,
+	build: {
+		entryReturnsHTML: false,
+	},
 };
 
 export type DevScriptsConfig = typeof defaultConfig;
@@ -35,6 +38,7 @@ export function loadConfig(): DevScriptsConfig {
 		plugins: config.plugins,
 		port: config.port,
 		buildOnLintError: config.buildOnLintError,
+		build: config.build,
 	};
 }
 

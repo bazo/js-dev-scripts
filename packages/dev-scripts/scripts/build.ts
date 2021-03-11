@@ -18,30 +18,53 @@ import revPath from "rev-path";
 import { gzip } from "../lib/gzip";
 import prettyBytes from "pretty-bytes";
 import figures from "figures";
-
+import {
+	DevScriptsConfig,
+	envVarsDefinitionsToTemplateVars,
+	findPublicHTMLFileForEntryPoint,
+	getEnvVarsDefinitions,
+	loadConfig,
+} from "../lib/config";
+import * as vm from "vm";
 process.env.NODE_ENV = "production";
 
 const cwd = process.cwd();
-const buildFolder = path.resolve(cwd, "./build");
-const srcFolder = path.resolve(cwd, "./src");
-const publicFolder = path.resolve(cwd, "./public");
-const indexFile = path.resolve(cwd, publicFolder, "index.html");
+
+const config = loadConfig();
+
+const { srcFolder, buildFolder, publicFolder } = config;
+
+const envVarsDefinitions = {
+	"process.env.NODE_ENV": '"production"',
+	...getEnvVarsDefinitions(),
+};
 
 const esbuildOptions: esbuild.BuildOptions = {
-	entryPoints: [srcFolder + "/index.tsx"],
-	outdir: buildFolder,
 	sourcemap: true,
-	define: {
-		"process.env.NODE_ENV": '"production"',
-	},
+	define: envVarsDefinitions,
+	outdir: buildFolder,
 	bundle: true,
 	color: true,
 	write: false,
 	format: "esm",
+	incremental: true,
 	//inject: [path.resolve(__dirname, "../react-shim.js")],
-	minify: true,
-	splitting: true,
 	logLevel: "error",
+	plugins: config.plugins,
+	/*
+	loader: {
+		".png": "file",
+		".svg": "file",
+		".eot": "file",
+		".woff": "file",
+		".woff2": "file",
+		".ttf": "file",
+		".jpg": "file",
+		".jpeg": "file",
+	},
+	*/
+	publicPath: publicFolder,
+	external: ["*.png", "*.svg", "*.eot", "*.woff", "*.woff2", "*.ttf", "*.jpg", "*.jpeg"],
 };
 
 function cleanBuildFolder() {
@@ -52,11 +75,20 @@ async function lintApp(): Promise<LintResults> {
 	return lintFile(srcFolder);
 }
 
-async function buildApp(): Promise<esbuild.BuildResult> {
-	return await esbuild.build(esbuildOptions);
+async function buildApp(entryPoint: string): Promise<[Error | null, esbuild.BuildResult | Partial<esbuild.BuildResult>]> {
+	try {
+		return [null, await esbuild.build({ ...esbuildOptions, entryPoints: [entryPoint] })];
+	} catch (error) {
+		console.log(error);
+		return [error, { outputFiles: [] }];
+	}
 }
 
-async function buildPublic(builtFiles: esbuild.OutputFile[] = []): Promise<[BuiltFilesReport[], number, NodeJS.ErrnoException[]]> {
+async function buildPublic(
+	htmlFile: string,
+	builtFiles: esbuild.OutputFile[] = [],
+	config: DevScriptsConfig
+): Promise<[BuiltFilesReport[], number, NodeJS.ErrnoException[]]> {
 	const jsFiles: esbuild.OutputFile[] = [];
 	const cssFiles: esbuild.OutputFile[] = [];
 
@@ -94,43 +126,56 @@ async function buildPublic(builtFiles: esbuild.OutputFile[] = []): Promise<[Buil
 				}
 			}
 
-			const baseName = path.basename(file.path);
-			const fileName = `${chalk.grey(path.dirname(path.relative(cwd, file.path)) + "/")}${chalk.cyan(baseName)}`;
-			fileSizes.push({
-				size: buffer.length,
-				gzippedSize: gzipped.length,
-				fileName,
-			});
-			if (fileName.length > padLength) {
-				padLength = fileName.length;
+			if (!config.build.entryReturnsHTML) {
+				const baseName = path.basename(file.path);
+				const fileName = `${chalk.grey(path.dirname(path.relative(cwd, file.path)) + "/")}${chalk.cyan(baseName)}`;
+				fileSizes.push({
+					size: buffer.length,
+					gzippedSize: gzipped.length,
+					fileName,
+				});
+				if (fileName.length > padLength) {
+					padLength = fileName.length;
+				}
 			}
 		}
 
-		fs.writeFile(file.path, file.contents, { encoding: "utf8" }, errorPush);
-		fs.writeFile(`${file.path}.gz`, gzipped, { encoding: "utf8" }, errorPush);
+		if (config.build.entryReturnsHTML && ext === ".js") {
+			continue;
+		}
+		fs.writeFileSync(file.path, file.contents, { encoding: "utf8" });
+		fs.writeFileSync(`${file.path}.gz`, gzipped, { encoding: "utf8" });
 	}
 
-	const indexCode = nunjucks.render(indexFile, {
-		bundle_script: jsFiles
+	let bundle_script = "";
+	if (config.build.entryReturnsHTML) {
+		const code = jsFiles.reduce((code, file) => {
+			return code + file.text;
+		}, "");
+
+		const script = new vm.Script(code);
+		const context = vm.createContext({ global: {} });
+		bundle_script = script.runInContext(context);
+	} else {
+		bundle_script = jsFiles
 			.map((file) => {
 				return `<script charset="utf-8" src="/${path.relative(buildFolder, file.path)}" type="module"></script>`;
 			})
-			.join(""),
+			.join("");
+	}
+
+	const indexCode = nunjucks.render(htmlFile, {
+		bundle_script,
 		bundle_css: cssFiles
 			.map((file) => {
 				return `<link href="/${path.relative(buildFolder, file.path)}" rel="stylesheet" />`;
 			})
 			.join(""),
+		...envVarsDefinitionsToTemplateVars(envVarsDefinitions),
 	});
 
-	fs.writeFile(`${buildFolder}/index.html`, indexCode, { encoding: "utf8" }, errorPush);
-
-	//copy over other public files
-	await makeDir(buildFolder);
-	await cpy([`**/*`, `!index.html`], buildFolder, {
-		parents: true,
-		cwd: publicFolder,
-	});
+	const { name } = path.parse(htmlFile);
+	fs.writeFileSync(`${buildFolder}/${name}.html`, indexCode, { encoding: "utf8" });
 
 	return [fileSizes, padLength, errors];
 }
@@ -138,11 +183,25 @@ async function buildPublic(builtFiles: esbuild.OutputFile[] = []): Promise<[Buil
 async function build(): Promise<void> {
 	console.clear();
 	const cleanSpinner = ora("Cleaning build folder").start();
+	await makeDir(buildFolder);
 	cleanBuildFolder();
 	cleanSpinner.succeed();
 
-	const buildSpinner = ora("Building app");
+	//copy over other public files
+	const copyPublicSpinner = ora("Copying public folder").start();
 
+	const ignoredFiles = [];
+	for (const entryPoint of config.entryPoints) {
+		ignoredFiles.push(path.basename((await findPublicHTMLFileForEntryPoint(entryPoint, config)) as string));
+	}
+
+	await cpy([`**/*`, ...ignoredFiles.map((name) => `!${name}`)], buildFolder, {
+		parents: true,
+		cwd: publicFolder,
+	});
+	copyPublicSpinner.succeed();
+
+	const buildSpinner = ora("Building app");
 	const lintSpinner = ora(`${prefix("eslint")} Running`).start();
 	const lintResult = await lintApp();
 
@@ -173,26 +232,35 @@ async function build(): Promise<void> {
 
 	tscLintSpinner.succeed(`${prefix("typescript")} OK`);
 
-	const { outputFiles } = await buildApp();
-
-	const [filesReport, padLength] = await buildPublic(outputFiles);
-
-	buildSpinner.succeed(`${prefix("build")} OK`);
-
 	processLintResult(lintResult);
 	processTscLintResult(tscLintResult);
 
-	console.log("File sizes after gzip:\n");
-	console.log(
-		filesReport
-			.map((file) => {
-				const gzippedChalk = file.gzippedSize < file.size ? chalk.green : chalk.red;
-				return `  ${file.fileName.padEnd(padLength)} ${chalk.grey(prettyBytes(file.size))} ${figures.arrowRight} ${gzippedChalk(
-					prettyBytes(file.gzippedSize)
-				)}`;
-			})
-			.join("\n")
-	);
+	for (const entryPoint of config.entryPoints) {
+		const [error, { outputFiles }] = await buildApp(entryPoint);
+		const htmlFile = await findPublicHTMLFileForEntryPoint(entryPoint, config);
+
+		if (htmlFile) {
+			const [filesReport, padLength, errors] = await buildPublic(htmlFile, outputFiles, config);
+			if (filesReport.length > 0) {
+				console.log("File sizes after gzip:\n");
+				console.log(
+					filesReport
+						.map((file) => {
+							const gzippedChalk = file.gzippedSize < file.size ? chalk.green : chalk.red;
+							return `  ${file.fileName.padEnd(padLength)} ${chalk.grey(prettyBytes(file.size))} ${figures.arrowRight} ${gzippedChalk(
+								prettyBytes(file.gzippedSize)
+							)}`;
+						})
+						.join("\n")
+				);
+			}
+			if (errors.length) {
+				console.log({ errors });
+			}
+		}
+	}
+
+	buildSpinner.succeed(`${prefix("build")} OK`);
 
 	console.log("\n");
 
@@ -206,4 +274,7 @@ You may serve it with a static server:
   ${chalk.cyan("serve")} -s build\n`);
 }
 
-build();
+(async () => {
+	await build();
+	process.exit();
+})();

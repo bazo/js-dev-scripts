@@ -24,7 +24,7 @@ import {
 	getEnvVarsDefinitions,
 	loadConfig,
 } from "../lib/config";
-import postcssPlugin from "../plugins/postcss";
+import * as vm from "vm";
 
 process.env.NODE_ENV = "development";
 const HOST = process.env.HOST || "0.0.0.0";
@@ -49,7 +49,7 @@ const esbuildOptions: esbuild.BuildOptions = {
 	incremental: true,
 	//inject: [path.resolve(__dirname, "../react-shim.js")],
 	logLevel: "error",
-	plugins: [...config.plugins, postcssPlugin()],
+	plugins: config.plugins,
 	/*
 	loader: {
 		".png": "file",
@@ -96,7 +96,7 @@ function getPublicMemoryPath(filePath: string): string {
 	return `/${path.relative(publicFolder, filePath)}`;
 }
 
-async function buildPublic(htmlFile: string, builtFiles: esbuild.OutputFile[] = [], wsPort: number): Promise<void> {
+async function buildPublic(htmlFile: string, builtFiles: esbuild.OutputFile[] = [], config: DevScriptsConfig, wsPort: number): Promise<void> {
 	if (builtFiles.length === 0) {
 		return;
 	}
@@ -127,14 +127,29 @@ async function buildPublic(htmlFile: string, builtFiles: esbuild.OutputFile[] = 
 
 		fm.setFile(getMemoryPath(file.path), file.text);
 	}
-	const htmlCode = nunjucks.render(htmlFile, {
-		bundle_script:
+
+	let bundle_script = "";
+
+	if (config.build.entryReturnsHTML) {
+		const code = jsFiles.reduce((code, file) => {
+			return code + file.text;
+		}, "");
+
+		const script = new vm.Script(code);
+		const context = vm.createContext({ global: {} });
+		bundle_script = script.runInContext(context);
+	} else {
+		bundle_script =
 			`<script charset="utf-8">window.WEBSOCKET_PORT=${wsPort.toString()};</script><script charset="utf-8" src="/dev.js" type="module"></script>` +
 			jsFiles
 				.map((file) => {
 					return `<script charset="utf-8" src="${getMemoryPath(file.path)}" type="module"></script>`;
 				})
-				.join(""),
+				.join("");
+	}
+
+	const htmlCode = nunjucks.render(htmlFile, {
+		bundle_script,
 		bundle_css: cssFiles
 			.map((file) => {
 				return `<link href="${getMemoryPath(file.path)}" rel="stylesheet" />`;
@@ -160,7 +175,7 @@ async function build(config: DevScriptsConfig, wsPort: number): Promise<void> {
 		const [error, { outputFiles }] = await buildApp(entryPoint);
 		const htmlFile = await findPublicHTMLFileForEntryPoint(entryPoint, config);
 		if (htmlFile) {
-			buildPublic(htmlFile, outputFiles, wsPort);
+			buildPublic(htmlFile, outputFiles, config, wsPort);
 		}
 	}
 }
