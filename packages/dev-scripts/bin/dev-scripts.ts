@@ -29,7 +29,7 @@ let execPath = "node";
 const fileExt = process.env.FILE_EXT || "ts";
 
 /* @__PURE__ */
-if (process.env.__DEV_SCRIPTS_MODE !== "production") {
+if (process.env.__DEV_SCRIPTS_MODE === "development") {
 	execPath = path.resolve(__dirname, "../node_modules/.bin/ts-node-script");
 	if (script === "start") {
 		execPath = path.resolve(__dirname, "../node_modules/.bin/ts-node-dev");
@@ -42,6 +42,7 @@ if (process.env.__DEV_SCRIPTS_MODE !== "production") {
 		]);
 	}
 }
+
 
 if (["build", "start", "test"].includes(script)) {
 	nodeArgs = nodeArgs.concat(require.resolve(`../scripts/${script}.${fileExt}`)).concat(args.slice(scriptIndex + 1));
