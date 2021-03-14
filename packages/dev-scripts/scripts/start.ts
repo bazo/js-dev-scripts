@@ -24,6 +24,7 @@ import {
 	loadConfig,
 } from "../lib/config";
 import * as vm from "vm";
+import proxy from "../lib/proxy/client";
 
 process.env.NODE_ENV = "development";
 const HOST = process.env.HOST || "0.0.0.0";
@@ -37,6 +38,14 @@ const envVarsDefinitions = {
 	...getEnvVarsDefinitions(),
 };
 
+function resolveInjects(config: DevScriptsConfig): string[] {
+	if (config.framework === "react") {
+		return [path.resolve(__dirname, "../react-shim.js")];
+	}
+
+	return [];
+}
+
 const esbuildOptions: esbuild.BuildOptions = {
 	sourcemap: true,
 	define: envVarsDefinitions,
@@ -46,7 +55,7 @@ const esbuildOptions: esbuild.BuildOptions = {
 	write: false,
 	format: "esm",
 	incremental: true,
-	//inject: [path.resolve(__dirname, "../react-shim.js")],
+	inject: resolveInjects(config),
 	logLevel: "error",
 	plugins: config.plugins,
 	/*
@@ -179,7 +188,7 @@ async function build(config: DevScriptsConfig, wsPort: number): Promise<void> {
 	}
 }
 
-async function startServer(port: number): Promise<WebSocket.Server> {
+async function startServer(config: DevScriptsConfig, port: number): Promise<WebSocket.Server> {
 	console.log(chalk.cyan("Starting the development server...\n"));
 	const server = http.createServer((request: http.IncomingMessage, response: http.ServerResponse) => {
 		let filePath = request.url || "/";
@@ -196,7 +205,19 @@ async function startServer(port: number): Promise<WebSocket.Server> {
 			response.writeHead(200, { "Content-Type": contentType });
 			response.end(content, "utf-8");
 		} else {
-			const content = fm.getContents("index.html");
+			if (config.proxy) {
+				for (const [route, proxyOptions] of Object.entries(config.proxy)) {
+					const regex = `${route}(.*)`;
+					const match = filePath.match(regex);
+					if (match) {
+						const url = `${proxyOptions.target}${match[1]}`;
+						proxy(request, response, url);
+						return;
+					}
+				}
+			}
+
+			const content = fm.getContents("/index.html");
 			response.writeHead(200, { "Content-Type": "text/html" });
 			response.end(content, "utf-8");
 		}
@@ -238,7 +259,7 @@ async function start() {
 	const preferredPort = process.env.PORT ? parseInt(process.env.PORT) : config.port;
 	const port = await getPort({ port: preferredPort });
 
-	wss = await startServer(port);
+	wss = await startServer(config, port);
 
 	const notifyBuildStart = () => {
 		if (wss) {

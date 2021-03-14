@@ -1,13 +1,14 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { GrammarItem } from "@aivenio/tsc-output-parser";
 import chalk from "chalk";
-import { LintResults, Message } from "./types";
+import { LintResults, Message } from "@bazo/js-dev-scripts-types";
 import * as path from "path";
 import { SourceMapConsumer, NullableMappedPosition } from "source-map";
 import { highlight } from "cli-highlight";
 import figures from "figures";
 import prettyMilliseconds from "pretty-ms";
 import convertHrtime from "convert-hrtime";
+import WebSocket from "ws";
 
 export function formatChokidarEvent(eventName: "add" | "addDir" | "change" | "unlink" | "unlinkDir", path: string): string {
 	switch (eventName) {
@@ -33,7 +34,7 @@ export function clearConsole(): void {
 	process.stdout.write(process.platform === "win32" ? "\x1B[2J\x1B[0f" : "\x1B[2J\x1B[3J\x1B[H");
 }
 
-export function processLintResult({ results = [] }: LintResults): void {
+export function processLintResult({ results = [] }: LintResults, wss?: WebSocket.Server): void {
 	if (results.length > 0) {
 		console.log("\n");
 		results.forEach((result) => {
@@ -46,6 +47,12 @@ export function processLintResult({ results = [] }: LintResults): void {
 				});
 				console.log(`${header}${messages.join("")}`);
 			}
+		});
+	}
+
+	if (wss) {
+		wss.clients.forEach((ws) => {
+			ws.send(createMessage("lint-results", { results }));
 		});
 	}
 }

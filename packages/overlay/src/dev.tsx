@@ -70,6 +70,13 @@ function handleMessage({ event, data }: Message) {
 			});
 
 			window.location.reload();
+			break;
+		}
+
+		case "lint-results": {
+			console.info("[Lint] ");
+			console.log({ data });
+			break;
 		}
 	}
 }

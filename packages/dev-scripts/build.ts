@@ -22,7 +22,7 @@ const esbuildOptions: esbuild.BuildOptions = {
 	pure: [],
 	tsconfig: "./tsconfig.build.json",
 	bundle: true,
-	external: ["esbuild", "@bazo/js-dev-overlay", "eslint", "espree", "expect", "sass", "pretty-error"],
+	external: ["esbuild", "@bazo/js-dev-overlay", "react", "eslint", "espree", "expect", "sass", "pretty-error"],
 };
 
 async function build(): Promise<void> {

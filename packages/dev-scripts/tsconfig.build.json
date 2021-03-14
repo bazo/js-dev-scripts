@@ -9,8 +9,8 @@
 		"moduleResolution": "node",
 		"module": "CommonJS",
 		"declaration": true,
-		"outDir": "./dist"
-		
+		"declarationDir": "./dist",
+		"outDir": "./dist",
 	},
-	"include": ["bin/*", "scripts/*", "lib/*", "build.ts"]
+	"include": ["bin/*", "scripts/*", "lib/*", "plugins/*", "build.ts"]
 }

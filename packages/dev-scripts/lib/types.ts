@@ -20,17 +20,6 @@ export const mimeTypes = {
 
 export type Extname = keyof typeof mimeTypes;
 
-export interface LintResults {
-	errorCount: number;
-	warningCount: number;
-	results: ESLint.LintResult[];
-}
-
-export interface Message {
-	event: "dev-server-connected" | "bundle-build-start" | "bundle-build-end";
-	data: any;
-}
-
 export interface BuiltFilesReport {
 	size: number;
 	gzippedSize: number;

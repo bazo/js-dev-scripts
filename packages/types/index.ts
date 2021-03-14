@@ -28,7 +28,7 @@ export interface LintResults {
 }
 
 export interface Message {
-	event: "dev-server-connected" | "bundle-build-start" | "bundle-build-end";
+	event: "dev-server-connected" | "bundle-build-start" | "bundle-build-end" | "lint-results";
 	data: unknown;
 }
 

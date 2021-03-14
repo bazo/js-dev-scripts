@@ -1,9 +1,9 @@
 import { ESLint } from "eslint";
 import execa from "execa";
-import { LintResults } from "./types";
 import { GrammarItem, parse } from "@aivenio/tsc-output-parser";
 import { prefix } from "./functions";
 import chalk from "chalk";
+import { LintResults } from "@bazo/js-dev-scripts-types";
 
 const eslint = new ESLint({
 	useEslintrc: true,
@@ -26,7 +26,9 @@ export async function lintFile(path: string): Promise<LintResults> {
 	} catch (error) {
 		console.clear();
 		console.log(
-			`${chalk.red(prefix("eslint"))} ${error.message} (${chalk.dim(error.messageTemplate)}). \n          Check if you have eslintrc file in root.\n`
+			`${chalk.red(prefix("eslint"))} ${error.message} (${chalk.dim(
+				error.messageTemplate
+			)}). \n          Check if you have eslintrc file in root.\n`
 		);
 		process.exit();
 	}

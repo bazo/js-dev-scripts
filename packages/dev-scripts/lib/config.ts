@@ -3,7 +3,33 @@ import * as path from "path";
 import * as fs from "fs";
 const cwd = process.cwd();
 
-const defaultConfig = {
+interface ProxyOptions {
+	target: string
+}
+
+interface ProxyConfig {
+	[route: string]: ProxyOptions
+}
+
+export type DevScriptsConfig = {
+	srcFolder: string;
+	entryPoints: string[];
+	buildFolder: string;
+	publicFolder: string;
+	tempFolder: string;
+	testGlob: string;
+	srcGlob: string;
+	plugins: never[];
+	port: number;
+	buildOnLintError: boolean;
+	build: {
+		entryReturnsHTML?: boolean;
+	};
+	framework: undefined | "react";
+	proxy: undefined | ProxyConfig
+};
+
+const defaultConfig: DevScriptsConfig = {
 	srcFolder: "./src",
 	entryPoints: ["index.tsx"],
 	buildFolder: "./build",
@@ -17,9 +43,9 @@ const defaultConfig = {
 	build: {
 		entryReturnsHTML: false,
 	},
+	framework: "react",
+	proxy: undefined
 };
-
-export type DevScriptsConfig = typeof defaultConfig;
 
 export function loadConfig(): DevScriptsConfig {
 	const explorerSync = cosmiconfigSync("dev-scripts");
@@ -28,6 +54,7 @@ export function loadConfig(): DevScriptsConfig {
 	const srcFolder = path.resolve(cwd, config.srcFolder);
 
 	return {
+		...config,
 		srcFolder,
 		entryPoints: config.entryPoints.map((entryPoint: string) => `${srcFolder}/${entryPoint}`),
 		buildFolder: path.resolve(cwd, config.buildFolder),
@@ -35,10 +62,6 @@ export function loadConfig(): DevScriptsConfig {
 		tempFolder: path.resolve(cwd, config.tempFolder),
 		testGlob: `${srcFolder}/**/*.test.(ts|tsx|js|jsx)`,
 		srcGlob: `${srcFolder}/**/*(?!test).*`,
-		plugins: config.plugins,
-		port: config.port,
-		buildOnLintError: config.buildOnLintError,
-		build: config.build,
 	};
 }
 
