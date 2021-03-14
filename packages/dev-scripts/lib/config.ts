@@ -1,14 +1,15 @@
 import { cosmiconfigSync } from "cosmiconfig";
 import * as path from "path";
 import * as fs from "fs";
+import { typeScriptLoaderSync as TypeScriptLoader } from "./typescriptLoader";
 const cwd = process.cwd();
 
 interface ProxyOptions {
-	target: string
+	target: string;
 }
 
 interface ProxyConfig {
-	[route: string]: ProxyOptions
+	[route: string]: ProxyOptions;
 }
 
 export type DevScriptsConfig = {
@@ -26,7 +27,7 @@ export type DevScriptsConfig = {
 		entryReturnsHTML?: boolean;
 	};
 	framework: undefined | "react";
-	proxy: undefined | ProxyConfig
+	proxy: undefined | ProxyConfig;
 };
 
 const defaultConfig: DevScriptsConfig = {
@@ -44,11 +45,25 @@ const defaultConfig: DevScriptsConfig = {
 		entryReturnsHTML: false,
 	},
 	framework: "react",
-	proxy: undefined
+	proxy: undefined,
 };
 
 export function loadConfig(): DevScriptsConfig {
-	const explorerSync = cosmiconfigSync("dev-scripts");
+	const moduleName = "devscripts";
+	const explorerSync = cosmiconfigSync(moduleName, {
+		searchPlaces: [
+			"package.json",
+			`.${moduleName}rc`,
+			`.${moduleName}rc.json`,
+			`.${moduleName}rc.yaml`,
+			`.${moduleName}rc.yml`,
+			`.${moduleName}rc.ts`,
+			`.${moduleName}rc.js`,
+			`${moduleName}.config.ts`,
+			`${moduleName}.config.js`,
+		],
+		loaders: { ".ts": TypeScriptLoader },
+	});
 	const config = { ...defaultConfig, ...explorerSync.search()?.config };
 
 	const srcFolder = path.resolve(cwd, config.srcFolder);
