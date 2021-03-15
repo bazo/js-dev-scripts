@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import Nano, { Component } from "nano-jsx";
 import { Store } from "nano-jsx/lib/store";
-
 import { Spinner } from "spin.js";
 
 const spinnerOptions = {

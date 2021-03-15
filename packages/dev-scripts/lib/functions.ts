@@ -1,14 +1,14 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { GrammarItem } from "@aivenio/tsc-output-parser";
-import chalk from "chalk";
 import { LintResults, Message } from "@bazo/js-dev-scripts-types";
-import * as path from "path";
-import { SourceMapConsumer, NullableMappedPosition } from "source-map";
+import chalk from "chalk";
 import { highlight } from "cli-highlight";
-import figures from "figures";
-import prettyMilliseconds from "pretty-ms";
 import convertHrtime from "convert-hrtime";
-import WebSocket from "ws";
+import figures from "figures";
+import * as path from "path";
+import prettyMilliseconds from "pretty-ms";
+import { NullableMappedPosition, SourceMapConsumer } from "source-map";
+import type WebSocket from "ws";
 
 export function formatChokidarEvent(eventName: "add" | "addDir" | "change" | "unlink" | "unlinkDir", path: string): string {
 	switch (eventName) {
@@ -80,6 +80,7 @@ export function padMultilineText(text: string, indent = 4): string {
 }
 
 async function getOriginalPosition(error: Error, sourceMap: string): Promise<NullableMappedPosition> {
+	// eslint-disable-next-line no-useless-escape
 	const linesAndColumns = error.stack?.match(/at [\/\w\.\_\s()-]*:(\d+:\d+)/);
 	let line: number | null = null;
 	let column: number | null = null;

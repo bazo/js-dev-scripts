@@ -1,8 +1,8 @@
+import { PluginBuild } from "esbuild";
 import * as fs from "fs";
+import * as path from "path";
 import postcss from "postcss";
 import * as util from "util";
-import * as path from "path";
-import { PluginBuild } from "esbuild";
 
 const readFile = util.promisify(fs.readFile);
 const writeFile = util.promisify(fs.writeFile);
@@ -20,7 +20,6 @@ const postcssPlugin = (userOptions = {}) => ({
 		const options = { ...defaultOptions, ...userOptions };
 		const { rootDir, plugins, tempDir } = options;
 		build.onResolve({ filter: /.\.(css)$/, namespace: "file" }, async (args) => {
-			console.log("postcss plugin running")
 			const sourceFullPath = path.resolve(args.resolveDir, args.path);
 			const sourceExt = path.extname(sourceFullPath);
 			const sourceBaseName = path.basename(sourceFullPath, sourceExt);

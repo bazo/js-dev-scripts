@@ -10,7 +10,7 @@
 		"module": "CommonJS",
 		"declaration": true,
 		"declarationDir": "./dist",
-		"outDir": "./dist",
+		"outDir": "./dist"
 	},
 	"include": ["bin/*", "scripts/*", "lib/*", "plugins/*", "build.ts"]
 }

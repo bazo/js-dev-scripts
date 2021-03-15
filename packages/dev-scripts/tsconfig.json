@@ -8,7 +8,6 @@
 		"noFallthroughCasesInSwitch": true,
 		"esModuleInterop": true,
 		"moduleResolution": "node"
-		
 	},
-	"include": ["bin/*", "scripts/*", "lib/*",  "plugins/*", "build.ts"]
+	"include": ["bin/*", "scripts/*", "lib/*", "plugins/*", "build.ts"]
 }

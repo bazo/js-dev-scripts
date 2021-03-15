@@ -1,7 +1,9 @@
 import { cosmiconfigSync } from "cosmiconfig";
-import * as path from "path";
 import * as fs from "fs";
+import * as path from "path";
+
 import { typeScriptLoaderSync as TypeScriptLoader } from "./typescriptLoader";
+
 const cwd = process.cwd();
 
 interface ProxyOptions {

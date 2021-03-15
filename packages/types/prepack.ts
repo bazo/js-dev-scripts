@@ -1,5 +1,6 @@
-import { generatePackageJson } from "../../build-functions";
 import { resolve } from "path";
+
+import { generatePackageJson } from "../../build-functions";
 
 const buildFolder = resolve("./dist");
 

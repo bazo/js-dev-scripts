@@ -8,7 +8,7 @@
 		"esModuleInterop": true,
 		"moduleResolution": "node",
 		"declaration": true,
-		"outDir": "./dist",
+		"outDir": "./dist"
 	},
 	"include": ["index.ts"]
 }

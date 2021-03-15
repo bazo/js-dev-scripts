@@ -1,21 +1,21 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import * as http from "http";
-import * as fs from "fs";
-import * as path from "path";
-import chokidar from "chokidar";
-import getPort from "get-port";
-import * as esbuild from "esbuild";
-import * as nunjucks from "nunjucks";
-import * as WebSocket from "ws";
-import chalk from "chalk";
-import FileManager from "../lib/fileManager";
 import { Extname, LintResults, mimeTypes } from "@bazo/js-dev-scripts-types";
-import { createMessage, formatChokidarEvent, processLintResult } from "../lib/functions";
-import { lintFile } from "../lib/lint";
+import chalk from "chalk";
+import chokidar from "chokidar";
+import debounce from "debounce-promise";
+import * as esbuild from "esbuild";
+import * as fs from "fs";
+import getPort from "get-port";
+import globby from "globby";
+import * as http from "http";
+import * as nunjucks from "nunjucks";
+import * as path from "path";
 import revHash from "rev-hash";
 //@ts-ignore
 import revPath from "rev-path";
-import globby from "globby";
+import * as vm from "vm";
+import * as WebSocket from "ws";
+
 import {
 	DevScriptsConfig,
 	envVarsDefinitionsToTemplateVars,
@@ -23,7 +23,9 @@ import {
 	getEnvVarsDefinitions,
 	loadConfig,
 } from "../lib/config";
-import * as vm from "vm";
+import FileManager from "../lib/fileManager";
+import { createMessage, formatChokidarEvent, processLintResult } from "../lib/functions";
+import { lintFile } from "../lib/lint";
 import proxy from "../lib/proxy/client";
 
 process.env.NODE_ENV = "development";
@@ -277,6 +279,25 @@ async function start() {
 		}
 	};
 
+	const onSourceFileChange = debounce(async () => {
+		notifyBuildStart();
+		const lintResult = await lintApp();
+
+		processLintResult(lintResult);
+
+		if (lintResult.errorCount === 0 || config.buildOnLintError) {
+			await build(config, port);
+		}
+		notifyBuildEnd();
+	}, 100);
+
+	const onPublicFileChange = debounce(async () => {
+		notifyBuildStart();
+
+		await build(config, port);
+		notifyBuildEnd();
+	}, 100);
+
 	const lintResult = await lintApp();
 	processLintResult(lintResult);
 	if (lintResult.errorCount === 0 || config.buildOnLintError) {
@@ -290,15 +311,7 @@ async function start() {
 
 		console.log(formatChokidarEvent(event, path));
 
-		notifyBuildStart();
-		const lintResult = await lintApp();
-
-		processLintResult(lintResult);
-
-		if (lintResult.errorCount === 0 || config.buildOnLintError) {
-			await build(config, port);
-		}
-		notifyBuildEnd();
+		onSourceFileChange();
 	});
 
 	chokidar.watch(publicFolder, { awaitWriteFinish: false, ignoreInitial: true }).on("all", async (event, path) => {
@@ -308,10 +321,7 @@ async function start() {
 
 		console.log(formatChokidarEvent(event, path));
 
-		notifyBuildStart();
-
-		await build(config, port);
-		notifyBuildEnd();
+		onPublicFileChange();
 	});
 }
 

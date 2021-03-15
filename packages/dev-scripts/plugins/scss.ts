@@ -1,11 +1,12 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import * as fs from "fs";
-import * as util from "util";
-import * as path from "path";
 import { Plugin, PluginBuild } from "esbuild";
-import sass from "sass";
-const writeFile = util.promisify(fs.writeFile);
+import * as fs from "fs";
 import makeDir from "make-dir";
+import * as path from "path";
+import sass from "sass";
+import * as util from "util";
+
+const writeFile = util.promisify(fs.writeFile);
 
 const defaultOptions = {
 	plugins: [],

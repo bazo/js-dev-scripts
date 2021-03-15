@@ -1,6 +1,7 @@
 import execa from "execa";
-import { cleanBuildFolder } from "../../build-functions";
 import { resolve } from "path";
+
+import { cleanBuildFolder } from "../../build-functions";
 
 const buildFolder = resolve("./dist");
 

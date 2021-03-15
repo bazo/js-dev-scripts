@@ -1,10 +1,17 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-process.env.NODE_ENV = "development";
-
-import * as path from "path";
+import chalk from "chalk";
 import chokidar from "chokidar";
 import * as esbuild from "esbuild";
-import chalk from "chalk";
+import expect from "expect";
+import figures from "figures";
+import * as fs from "fs";
+import globby from "globby";
+import * as path from "path";
+import { without } from "ramda";
+//@ts-ignore
+import sourceMapURL from "source-map-url";
+import * as vm from "vm";
+
 import {
 	formatChokidarEvent,
 	formatTestDuration,
@@ -14,14 +21,8 @@ import {
 	showTotalResults,
 } from "../lib/functions";
 import Tester, { Results, SuiteResults } from "../lib/testing/runtime";
-import { without } from "ramda";
-import expect from "expect";
-import * as fs from "fs";
-import * as vm from "vm";
-//@ts-ignore
-import sourceMapURL from "source-map-url";
-import globby from "globby";
-import figures from "figures";
+
+process.env.NODE_ENV = "development";
 
 const cwd = process.cwd();
 const srcFolder = path.resolve(cwd, "./src");

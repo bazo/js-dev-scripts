@@ -1,9 +1,10 @@
+import { GrammarItem, parse } from "@aivenio/tsc-output-parser";
+import { LintResults } from "@bazo/js-dev-scripts-types";
+import chalk from "chalk";
 import { ESLint } from "eslint";
 import execa from "execa";
-import { GrammarItem, parse } from "@aivenio/tsc-output-parser";
+
 import { prefix } from "./functions";
-import chalk from "chalk";
-import { LintResults } from "@bazo/js-dev-scripts-types";
 
 const eslint = new ESLint({
 	useEslintrc: true,

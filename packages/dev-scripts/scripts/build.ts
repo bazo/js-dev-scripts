@@ -1,22 +1,21 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import * as fs from "fs";
-import * as path from "path";
-import * as esbuild from "esbuild";
-import * as nunjucks from "nunjucks";
-import { BuiltFilesReport, LintResults } from "../lib/types";
-import { lintFile, tscLint } from "../lib/lint";
-import { prefix, processLintResult, processTscLintResult } from "../lib/functions";
-import del from "del";
-import ora from "ora";
-import makeDir from "make-dir";
-import cpy from "cpy";
+import { LintResults } from "@bazo/js-dev-scripts-types";
 import chalk from "chalk";
+import cpy from "cpy";
+import del from "del";
+import * as esbuild from "esbuild";
+import figures from "figures";
+import * as fs from "fs";
+import makeDir from "make-dir";
+import * as nunjucks from "nunjucks";
+import ora from "ora";
+import * as path from "path";
+import prettyBytes from "pretty-bytes";
 import revHash from "rev-hash";
 //@ts-ignore
 import revPath from "rev-path";
-import { gzip } from "../lib/gzip";
-import prettyBytes from "pretty-bytes";
-import figures from "figures";
+import * as vm from "vm";
+
 import {
 	DevScriptsConfig,
 	envVarsDefinitionsToTemplateVars,
@@ -24,7 +23,11 @@ import {
 	getEnvVarsDefinitions,
 	loadConfig,
 } from "../lib/config";
-import * as vm from "vm";
+import { prefix, processLintResult, processTscLintResult } from "../lib/functions";
+import { gzip } from "../lib/gzip";
+import { lintFile, tscLint } from "../lib/lint";
+import { BuiltFilesReport } from "../lib/types";
+
 process.env.NODE_ENV = "production";
 
 const cwd = process.cwd();
@@ -92,12 +95,6 @@ async function buildPublic(
 	const cssFiles: esbuild.OutputFile[] = [];
 
 	const errors: NodeJS.ErrnoException[] = [];
-
-	const errorPush = (error: NodeJS.ErrnoException | null) => {
-		if (error) {
-			errors.push(error);
-		}
-	};
 
 	const fileSizes: BuiltFilesReport[] = [];
 

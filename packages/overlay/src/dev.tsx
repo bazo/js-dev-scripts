@@ -1,8 +1,10 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import "panic-overlay/build/panic-overlay.browser";
-import { ConstantBackoff, WebsocketBuilder } from "websocket-ts";
-import Nano from "nano-jsx";
+
 import { Message } from "@bazo/js-dev-scripts-types";
+import Nano from "nano-jsx";
+import { ConstantBackoff, WebsocketBuilder } from "websocket-ts";
+
 import InfoBar, { infoBarStore } from "./infoBar";
 
 interface MyWindow {

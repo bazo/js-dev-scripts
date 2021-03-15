@@ -1,5 +1,6 @@
 import * as esbuild from "esbuild";
 import { resolve } from "path";
+
 import { cleanBuildFolder } from "../../build-functions";
 
 const buildFolder = resolve("./dist");
