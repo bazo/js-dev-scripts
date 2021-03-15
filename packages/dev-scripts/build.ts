@@ -15,7 +15,7 @@ const esbuildOptions: esbuild.BuildOptions = {
 	},
 	color: true,
 	write: true,
-	//minify: true,
+	minify: true,
 	logLevel: "error",
 	target: "node15",
 	platform: "node",
