@@ -136,7 +136,7 @@ async function buildPublic(
 			}
 		}
 
-		if (config.build.entryReturnsHTML && ext === ".js") {
+		if (config.build.entryReturnsHTML && (ext === ".js" || ext === ".js.map")) {
 			continue;
 		}
 		fs.writeFileSync(file.path, file.contents, { encoding: "utf8" });
