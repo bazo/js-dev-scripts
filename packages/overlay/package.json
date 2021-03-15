@@ -1,6 +1,6 @@
 {
 	"name": "@bazo/js-dev-overlay",
-	"version": "0.0.25",
+	"version": "0.0.26",
 	"license": "MIT",
 	"main": "dist/index.js",
 	"files": [
@@ -13,7 +13,7 @@
 		"ncu:u": "ncu -u"
 	},
 	"devDependencies": {
-		"@bazo/js-dev-scripts-types": "^0.0.21",
+		"@bazo/js-dev-scripts-types": "^0.0.22",
 		"@types/ws": "^7.4.0",
 		"nano-jsx": "^0.0.16",
 		"panic-overlay": "^1.0.45",
