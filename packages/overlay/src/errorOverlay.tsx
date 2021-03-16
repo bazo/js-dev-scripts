@@ -8,8 +8,7 @@ import "prismjs/components/prism-tsx.js";
 import Nano, { Component } from "nano-jsx";
 import { Store } from "nano-jsx/lib/store";
 
-//@ts-ignore
-import css from "prismjs/themes/prism-tomorrow.css";
+import css from "./overlayStyle";
 
 import { showErrorOrigin } from "./sourceMaps";
 import StackTracey from "stacktracey";
@@ -135,60 +134,7 @@ class ErrorOverlay extends Component {
 
 		return (
 			<div class="content">
-				<style>
-					{css}
-					{`body {
-					background-color: #282b2d;
-					font-size: 12px;
-				}
-				#__dev-scripts-error-overlay {
-					height: 100vh;
-					width: 100%;
-					position: absolute;
-					top:0;
-					right: 0;
-					bottom: 0;
-				}
-				#__dev-scripts-error-overlay .content {
-					width: 60%;
-					margin: 0 auto;
-				}
-				#__dev-scripts-error-overlay {
-					font-family: Consolas, Menlo, monospace;
-					font-size: 1em;
-				}
-
-				#__dev-scripts-error-overlay pre[class*="language-"] {
-					background-color: rgba(251, 245, 180, 0.1);
-				}
-
-				#__dev-scripts-error-overlay pre[class*="language-"].main {
-					//background: #453234;
-					background-color: rgba(206, 17, 38, 0.1);
-				}
-
-				#__dev-scripts-error-overlay h1 {
-					color: #E83B46;
-					font-size: 1.5em;
-				}
-				#__dev-scripts-error-overlay .error-pagination {
-					display: flex;
-					color: rgb(135, 142, 145);
-				}
-				#__dev-scripts-error-overlay .error-pagination .arrow {
-					cursor: pointer;
-				}
-				#__dev-scripts-error-overlay .stack-block {
-					margin-bottom: 15px;
-				}
-				#__dev-scripts-error-overlay .stack-block .method {
-					color: #fff;
-				}
-				#__dev-scripts-error-overlay .stack-block .file {
-					color: rgb(135, 142, 145);
-				}
-				`}
-				</style>
+				<style>{css}</style>
 				{data && data.length > 1 ? (
 					<div class="error-pagination">
 						<div class="arrow arrow-back" onClick={this.prevPage}>
