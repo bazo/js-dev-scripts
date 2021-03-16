@@ -1,6 +1,6 @@
 {
 	"name": "@bazo/js-dev-scripts",
-	"version": "0.1.11",
+	"version": "0.1.12",
 	"license": "MIT",
 	"types": "./testing.d.ts",
 	"bin": {
@@ -16,7 +16,7 @@
 		"ncu:u": "ncu -u"
 	},
 	"dependencies": {
-		"@bazo/js-dev-overlay": "^0.0.28",
+		"@bazo/js-dev-overlay": "^0.0.29",
 		"@bazo/js-dev-scripts-types": "^0.0.22",
 		"debounce-promise": "^3.1.2",
 		"esbuild": "^0.8.55",
