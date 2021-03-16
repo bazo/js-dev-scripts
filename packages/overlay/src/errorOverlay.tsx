@@ -174,4 +174,19 @@ export default function errorOverlay() {
 
 		addErrorData({ message: event.error.toString(), stack: new StackTracey(event.error).withSources() });
 	});
+
+	window.addEventListener("unhandledrejection", (event) => {
+		if (typeof event.reason === "string") {
+			return;
+		}
+		event.preventDefault();
+
+		if (!isRendered) {
+			renderOverlay();
+			isRendered = true;
+		}
+
+		const error = event.reason;
+		addErrorData({ message: error.toString(), stack: new StackTracey(error).withSources() });
+	});
 }
