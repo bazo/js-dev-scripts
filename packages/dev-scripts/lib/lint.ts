@@ -46,7 +46,36 @@ export async function tscLint(args: string[] = [], isDev = false): Promise<Gramm
 
 		return [];
 	} catch (error) {
-		return parse(error.stdout) as GrammarItem[];
+		if (error.message.startsWith("Command failed with exit code 1")) {
+			return [
+				{
+					type: "Item",
+					value: {
+						message: { type: "Message", value: "tsconfig.json is missing" },
+						tsError: {
+							type: "TsError",
+							value: {
+								type: "error",
+								errorString: "TSCONFIG_NOT_FOUND",
+							},
+						},
+						path: {
+							type: "Path",
+							value: "",
+						},
+						cursor: {
+							type: "Cursor",
+							value: {
+								line: 0,
+								col: 0,
+							},
+						},
+					},
+				},
+			];
+		} else {
+			return parse(error.stdout) as GrammarItem[];
+		}
 	}
 	/*
 	return new Promise((resolve, reject) => {

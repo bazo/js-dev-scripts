@@ -1,11 +1,11 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
-import "panic-overlay/build/panic-overlay.browser";
-
 import { Message } from "@bazo/js-dev-scripts-types";
 import Nano from "nano-jsx";
 import { ConstantBackoff, WebsocketBuilder } from "websocket-ts";
 
+import errorOverlay from "./errorOverlay";
 import InfoBar, { infoBarStore } from "./infoBar";
+
+errorOverlay();
 
 interface MyWindow {
 	WEBSOCKET_PORT: number;
@@ -39,7 +39,6 @@ new WebsocketBuilder(`ws://localhost:${wsPort}`)
 	.build();
 
 const rerender = () => {
-	//@ts-ignore
 	Nano.render(<InfoBar />, infoBar);
 };
 

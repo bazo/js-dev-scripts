@@ -83,7 +83,6 @@ nunjucks.configure({
 const fm = new FileManager();
 
 const devJS = fs.readFileSync(require.resolve("@bazo/js-dev-overlay"), "utf8");
-
 fm.setFile("/dev.js", devJS);
 
 async function lintApp(): Promise<LintResults> {
@@ -323,6 +322,35 @@ async function start() {
 
 		onPublicFileChange();
 	});
+
+	if (process.env.__DEV_SCRIPTS_MODE === "development") {
+		const devScriptPath = path.resolve(__dirname, "../../overlay/src/dev.tsx");
+		chokidar.watch(path.dirname(devScriptPath), { awaitWriteFinish: false, ignoreInitial: false }).on("all", async (event, path) => {
+			if (!["change", "add"].includes(event)) {
+				return;
+			}
+
+			const devJS = (
+				await esbuild.build({
+					entryPoints: [devScriptPath],
+					bundle: true,
+					format: "esm",
+					jsxFactory: "Nano.h",
+					target: "esnext",
+					write: false,
+					sourcemap: "inline",
+					external: ["fs", "path"],
+					loader: {
+						".css": "text",
+					},
+				})
+			).outputFiles[0].text;
+
+			console.log("DEV.tsx CHANGED");
+			fm.setFile("/dev.js", devJS);
+			notifyBuildEnd();
+		});
+	}
 }
 
 start();

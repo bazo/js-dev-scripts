@@ -7,8 +7,9 @@ import convertHrtime from "convert-hrtime";
 import figures from "figures";
 import * as path from "path";
 import prettyMilliseconds from "pretty-ms";
-import { NullableMappedPosition, SourceMapConsumer } from "source-map";
 import type WebSocket from "ws";
+
+import { getOriginalPosition } from "./sourceMaps";
 
 export function formatChokidarEvent(eventName: "add" | "addDir" | "change" | "unlink" | "unlinkDir", path: string): string {
 	switch (eventName) {
@@ -78,7 +79,7 @@ export function padMultilineText(text: string, indent = 4): string {
 	const lines = text.split("\n");
 	return lines.map((line) => line.padStart(indent + line.length, " ")).join("\n");
 }
-
+/*
 async function getOriginalPosition(error: Error, sourceMap: string): Promise<NullableMappedPosition> {
 	// eslint-disable-next-line no-useless-escape
 	const linesAndColumns = error.stack?.match(/at [\/\w\.\_\s()-]*:(\d+:\d+)/);
@@ -98,7 +99,7 @@ async function getOriginalPosition(error: Error, sourceMap: string): Promise<Nul
 		});
 	});
 }
-
+*/
 export async function showErrorOrigin(error: Error, code: string, sourceMap: string): Promise<string> {
 	const originalPosition = await getOriginalPosition(error, sourceMap);
 
