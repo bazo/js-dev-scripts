@@ -1,6 +1,6 @@
 {
 	"name": "@bazo/js-dev-overlay",
-	"version": "0.0.27",
+	"version": "0.0.28",
 	"license": "MIT",
 	"main": "dist/index.js",
 	"files": [
