@@ -38,25 +38,24 @@ export async function lintFile(path: string): Promise<LintResults> {
 export async function tscLint(args: string[] = [], isDev = false): Promise<GrammarItem[]> {
 	try {
 		await execa.command(`tsc ${args ? args : ""} --noEmit ${isDev ? "--watch" : ""}`, {
-			//env: npmRunPath.env(),
-			extendEnv: true,
 			windowsHide: false,
 			cwd: process.cwd(),
 		});
 
 		return [];
 	} catch (error) {
-		if (error.message.startsWith("Command failed with exit code 1")) {
+		if (error.message.startsWith("Command failed with exit code ")) {
+			const matches = (error.stdout as string).matchAll(/.*(TS[\d]+): ([\s\S]+)/g).next().value;
 			return [
 				{
 					type: "Item",
 					value: {
-						message: { type: "Message", value: "tsconfig.json is missing" },
+						message: { type: "Message", value: matches[2] },
 						tsError: {
 							type: "TsError",
 							value: {
 								type: "error",
-								errorString: "TSCONFIG_NOT_FOUND",
+								errorString: matches[1],
 							},
 						},
 						path: {
@@ -74,7 +73,12 @@ export async function tscLint(args: string[] = [], isDev = false): Promise<Gramm
 				},
 			];
 		} else {
-			return parse(error.stdout) as GrammarItem[];
+			try {
+				return parse(error.stdout) as GrammarItem[];
+			} catch (err) {
+				console.log(error);
+				throw err;
+			}
 		}
 	}
 	/*

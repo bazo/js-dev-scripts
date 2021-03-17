@@ -1,7 +1,8 @@
-/// <reference types="expect" />
+/// <reference types="expect/build/types" />
 
-export declare const describe: testing.Describe;
-export declare const test: testing.Test;
+declare const describe: testing.Describe;
+declare const test: testing.Test;
+declare const expect: Expect;
 
 declare namespace testing {
 	interface FunctionLike {

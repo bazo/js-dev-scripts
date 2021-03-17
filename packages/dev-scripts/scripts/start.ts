@@ -24,8 +24,8 @@ import {
 	loadConfig,
 } from "../lib/config";
 import FileManager from "../lib/fileManager";
-import { createMessage, formatChokidarEvent, processLintResult } from "../lib/functions";
-import { lintFile } from "../lib/lint";
+import { createMessage, formatChokidarEvent, processLintResult, processTscLintResult } from "../lib/functions";
+import { lintFile, tscLint } from "../lib/lint";
 import proxy from "../lib/proxy/client";
 
 process.env.NODE_ENV = "development";
@@ -280,13 +280,17 @@ async function start() {
 
 	const onSourceFileChange = debounce(async () => {
 		notifyBuildStart();
-		const lintResult = await lintApp();
 
+		const lintResult = await lintApp();
 		processLintResult(lintResult);
 
-		if (lintResult.errorCount === 0 || config.buildOnLintError) {
-			await build(config, port);
+		const tscLintResult = await tscLint();
+		processTscLintResult(tscLintResult);
+
+		if ((lintResult.errorCount === 0 && tscLintResult.length === 0) || config.buildOnLintError) {
+			build(config, port);
 		}
+
 		notifyBuildEnd();
 	}, 100);
 
@@ -299,7 +303,11 @@ async function start() {
 
 	const lintResult = await lintApp();
 	processLintResult(lintResult);
-	if (lintResult.errorCount === 0 || config.buildOnLintError) {
+
+	const tscLintResult = await tscLint();
+	processTscLintResult(tscLintResult);
+
+	if ((lintResult.errorCount === 0 && tscLintResult.length === 0) || config.buildOnLintError) {
 		build(config, port);
 	}
 

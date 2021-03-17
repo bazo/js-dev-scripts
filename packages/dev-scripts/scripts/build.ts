@@ -41,6 +41,14 @@ const envVarsDefinitions = {
 	...getEnvVarsDefinitions(),
 };
 
+function resolveInjects(config: DevScriptsConfig): string[] {
+	if (config.framework === "react") {
+		return [path.resolve(__dirname, "../react-shim.js")];
+	}
+
+	return [];
+}
+
 const esbuildOptions: esbuild.BuildOptions = {
 	sourcemap: true,
 	define: envVarsDefinitions,
@@ -49,8 +57,7 @@ const esbuildOptions: esbuild.BuildOptions = {
 	color: true,
 	write: false,
 	format: "esm",
-	incremental: true,
-	//inject: [path.resolve(__dirname, "../react-shim.js")],
+	inject: resolveInjects(config),
 	logLevel: "error",
 	plugins: config.plugins,
 	/*
@@ -201,7 +208,7 @@ async function build(): Promise<void> {
 	const lintSpinner = ora(`${prefix("eslint")} Running`).start();
 	const lintResult = await lintApp();
 
-	if (lintResult.errorCount > 0) {
+	if (lintResult.errorCount > 0 && !config.buildOnLintError) {
 		lintSpinner.fail(`${prefix("eslint")} ${lintResult.errorCount} errors and ${lintResult.warningCount} warnings`);
 		buildSpinner.fail(`${prefix("build")} Failed`);
 		processLintResult(lintResult);
@@ -217,7 +224,7 @@ async function build(): Promise<void> {
 	const tscLintSpinner = ora(`${prefix("typescript")} Running`).start();
 	const tscLintResult = await tscLint();
 
-	if (tscLintResult.length > 0) {
+	if (tscLintResult.length > 0 && !config.buildOnLintError) {
 		tscLintSpinner.fail(`${prefix("typescript")} Failed`);
 
 		buildSpinner.fail(`${prefix("build")} Failed`);
