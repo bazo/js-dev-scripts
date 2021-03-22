@@ -1,6 +1,6 @@
 {
 	"name": "@bazo/create-react-app",
-	"version": "0.0.1",
+	"version": "0.0.2",
 	"license": "MIT",
 	"type": "commonjs",
 	"bin": {
@@ -15,7 +15,6 @@
 		"ncu": "ncu",
 		"ncu:u": "ncu -u"
 	},
-	"dependencies": {},
 	"devDependencies": {
 		"@types/adm-zip": "^0.4.33",
 		"@types/node": "^14.14.33",
