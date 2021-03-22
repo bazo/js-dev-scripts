@@ -54,6 +54,7 @@ const esbuildOptions: esbuild.BuildOptions = {
 	define: envVarsDefinitions,
 	outdir: buildFolder,
 	bundle: true,
+	minify: true,
 	color: true,
 	write: false,
 	format: "esm",
@@ -93,16 +94,15 @@ async function buildApp(entryPoint: string): Promise<[Error | null, esbuild.Buil
 	}
 }
 
-async function buildPublic(
-	htmlFile: string,
-	builtFiles: esbuild.OutputFile[] = [],
-	config: DevScriptsConfig
-): Promise<[BuiltFilesReport[], number, NodeJS.ErrnoException[]]> {
+interface BuiltFilesProcessedOutput {
+	jsFiles: esbuild.OutputFile[];
+	cssFiles: esbuild.OutputFile[];
+	fileSizes: BuiltFilesReport[];
+	padLength: number;
+}
+async function processBuiltFiles(builtFiles: esbuild.OutputFile[] = [], config: DevScriptsConfig): Promise<BuiltFilesProcessedOutput> {
 	const jsFiles: esbuild.OutputFile[] = [];
 	const cssFiles: esbuild.OutputFile[] = [];
-
-	const errors: NodeJS.ErrnoException[] = [];
-
 	const fileSizes: BuiltFilesReport[] = [];
 
 	let padLength = 0;
@@ -116,7 +116,6 @@ async function buildPublic(
 		if ([".js", ".css"].includes(ext)) {
 			const hash = revHash(buffer);
 			file.path = revPath(file.path, hash);
-
 			switch (ext) {
 				case ".js": {
 					jsFiles.push(file);
@@ -150,6 +149,17 @@ async function buildPublic(
 		fs.writeFileSync(`${file.path}.gz`, gzipped, { encoding: "utf8" });
 	}
 
+	return { jsFiles, cssFiles, fileSizes, padLength };
+}
+
+async function buildPublic(
+	htmlFile: string,
+	jsFiles: esbuild.OutputFile[] = [],
+	cssFiles: esbuild.OutputFile[] = [],
+	config: DevScriptsConfig
+): Promise<NodeJS.ErrnoException[]> {
+	const errors: NodeJS.ErrnoException[] = [];
+
 	let bundle_script = "";
 	if (config.build.entryReturnsHTML) {
 		const code = jsFiles.reduce((code, file) => {
@@ -180,7 +190,7 @@ async function buildPublic(
 	const { name } = path.parse(htmlFile);
 	fs.writeFileSync(`${buildFolder}/${name}.html`, indexCode, { encoding: "utf8" });
 
-	return [fileSizes, padLength, errors];
+	return errors;
 }
 
 async function build(): Promise<void> {
@@ -195,7 +205,10 @@ async function build(): Promise<void> {
 
 	const ignoredFiles = [];
 	for (const entryPoint of config.entryPoints) {
-		ignoredFiles.push(path.basename((await findPublicHTMLFileForEntryPoint(entryPoint, config)) as string));
+		const htmlFileName = (await findPublicHTMLFileForEntryPoint(entryPoint, config)) as string;
+		if (htmlFileName) {
+			ignoredFiles.push(path.basename(htmlFileName));
+		}
 	}
 
 	await cpy([`**/*`, ...ignoredFiles.map((name) => `!${name}`)], buildFolder, {
@@ -240,26 +253,27 @@ async function build(): Promise<void> {
 
 	for (const entryPoint of config.entryPoints) {
 		const [error, { outputFiles }] = await buildApp(entryPoint);
+		const { jsFiles, cssFiles, fileSizes, padLength } = await processBuiltFiles(outputFiles, config);
 		const htmlFile = await findPublicHTMLFileForEntryPoint(entryPoint, config);
 
 		if (htmlFile) {
-			const [filesReport, padLength, errors] = await buildPublic(htmlFile, outputFiles, config);
-			if (filesReport.length > 0) {
-				console.log("File sizes after gzip:\n");
-				console.log(
-					filesReport
-						.map((file) => {
-							const gzippedChalk = file.gzippedSize < file.size ? chalk.green : chalk.red;
-							return `  ${file.fileName.padEnd(padLength)} ${chalk.grey(prettyBytes(file.size))} ${figures.arrowRight} ${gzippedChalk(
-								prettyBytes(file.gzippedSize)
-							)}`;
-						})
-						.join("\n")
-				);
-			}
+			const errors = await buildPublic(htmlFile, jsFiles, cssFiles, config);
 			if (errors.length) {
 				console.log({ errors });
 			}
+		}
+		if (fileSizes.length > 0) {
+			console.log("File sizes after gzip:\n");
+			console.log(
+				fileSizes
+					.map((file) => {
+						const gzippedChalk = file.gzippedSize < file.size ? chalk.green : chalk.red;
+						return `  ${file.fileName.padEnd(padLength)} ${chalk.grey(prettyBytes(file.size))} ${figures.arrowRight} ${gzippedChalk(
+							prettyBytes(file.gzippedSize)
+						)}`;
+					})
+					.join("\n")
+			);
 		}
 	}
 

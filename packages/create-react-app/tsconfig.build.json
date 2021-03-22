@@ -1,0 +1,16 @@
+{
+	"compilerOptions": {
+		"target": "ESNext",
+		"skipLibCheck": true,
+		"strict": true,
+		"forceConsistentCasingInFileNames": true,
+		"noFallthroughCasesInSwitch": true,
+		"esModuleInterop": true,
+		"moduleResolution": "node",
+		"module": "CommonJS",
+		"declaration": true,
+		"declarationDir": "./dist",
+		"outDir": "./dist"
+	},
+	"include": ["index.ts", "build.ts"]
+}

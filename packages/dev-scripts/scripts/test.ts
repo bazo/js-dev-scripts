@@ -12,6 +12,7 @@ import { without } from "ramda";
 import sourceMapURL from "source-map-url";
 import * as vm from "vm";
 
+import { DevScriptsConfig, getEnvVarsDefinitions, loadConfig } from "../lib/config";
 import {
 	formatChokidarEvent,
 	formatTestDuration,
@@ -24,8 +25,9 @@ import Tester, { Results, SuiteResults } from "../lib/testing/runtime";
 
 process.env.NODE_ENV = "development";
 
-const cwd = process.cwd();
-const srcFolder = path.resolve(cwd, "./src");
+const config = loadConfig();
+
+const { srcFolder } = config;
 
 class TestMemory {
 	testFiles: string[] = [];
@@ -51,31 +53,52 @@ interface ResultsWithSource {
 	filePath: string;
 }
 
+const envVarsDefinitions = {
+	"process.env.NODE_ENV": '"development"',
+	...getEnvVarsDefinitions(),
+};
+
+function resolveInjects(config: DevScriptsConfig): string[] {
+	if (config.framework === "react") {
+		return [path.resolve(__dirname, "../react-shim.js")];
+	}
+
+	return [];
+}
+
 const esbuildOptions: esbuild.BuildOptions = {
 	sourcemap: "inline",
-	define: {
-		"process.env.NODE_ENV": '"development"',
-	},
+	define: envVarsDefinitions,
+	inject: resolveInjects(config),
 	bundle: true,
 	color: true,
 	write: false,
 	format: "esm",
 	incremental: true,
 	logLevel: "error",
+	platform: "node",
 	external: ["source-map-support"],
 };
 
 async function buildFile(file: string): Promise<{ buildResult: esbuild.BuildResult; originalCode: string }> {
 	return new Promise((resolve, reject) => {
 		fs.readFile(file, (err, data) => {
+			if (err) {
+				reject(err);
+				return;
+			}
 			const originalCode = data.toString("utf8");
 			const code = `
 			${originalCode}
 			run();
 			getResults();
 			`;
+
 			esbuild
-				.build({ ...esbuildOptions, stdin: { contents: code, resolveDir: path.dirname(file), sourcefile: file } })
+				.build({
+					...esbuildOptions,
+					stdin: { contents: code, resolveDir: path.dirname(file), sourcefile: file, loader: "tsx" },
+				})
 				.then((buildResult) => {
 					resolve({ buildResult, originalCode });
 				})
@@ -131,7 +154,9 @@ async function printTestReport(allResults: ResultsWithSource[]): Promise<void> {
 						console.log("");
 						console.log(`  ${chalk.red(`● ${suiteName} > ${testName}`)}`);
 						console.log("");
-						console.log(padMultilineText(testResult.error.matcherResult.message()));
+						console.log(
+							padMultilineText(testResult.error.matcherResult ? testResult.error.matcherResult.message() : testResult.error.message)
+						);
 						console.log("");
 						const codeHighlight = await showErrorOrigin(testResult.error, code, sourceMap);
 						console.log(codeHighlight);
@@ -166,13 +191,18 @@ async function test() {
 			const sourceMap = sourceMapURL.getFrom(codeAndSourceMap);
 			const code = sourceMapURL.removeFrom(codeAndSourceMap);
 
-			const sandbox = { ...new Tester(), expect, global: {} };
+			const sandbox = { ...new Tester(), expect, global: {}, process: { env: {}, argv: [] }, require, argv: [] };
 
 			const script = new vm.Script(code, {
 				filename: filePath,
 			});
 			const context = vm.createContext(sandbox);
-			return { results: script.runInContext(context) as Results, code: originalCode, sourceMap, filePath };
+			try {
+				return { results: script.runInContext(context) as Results, code: originalCode, sourceMap, filePath };
+			} catch (error) {
+				console.log(error);
+				return { results: {} as Results, code: originalCode, sourceMap, filePath };
+			}
 		}
 
 		return null;

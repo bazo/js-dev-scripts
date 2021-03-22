@@ -76,6 +76,9 @@ export function prefix(text: "build" | "eslint" | "typescript"): string {
 }
 
 export function padMultilineText(text: string, indent = 4): string {
+	if (!text) {
+		return "";
+	}
 	const lines = text.split("\n");
 	return lines.map((line) => line.padStart(indent + line.length, " ")).join("\n");
 }

@@ -40,6 +40,7 @@ if (process.env.__DEV_SCRIPTS_MODE === "development") {
 			"--script-mode",
 			"--rs",
 			"--exit-child",
+			"--inspect",
 			"--clear" /*`--watch ${path.resolve(__dirname, "../dev/dev.js")}`*/,
 		]);
 	}
@@ -50,6 +51,7 @@ if (["build", "start", "test"].includes(script)) {
 	const result = spawn.sync(execPath, nodeArgs, {
 		stdio: "inherit",
 	});
+
 	if (result.signal) {
 		if (result.signal === "SIGKILL") {
 			console.log(
